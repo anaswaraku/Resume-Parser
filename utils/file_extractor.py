@@ -2,13 +2,12 @@ import os
 import pdfplumber
 from docx import Document
 
-def extract_text(file_obj, filename: str):
+def extract_text(file_obj, ext: str):
     """
     Extract text from an uploaded file without saving to disk.
     file_obj: file-like object
     filename: original filename (to detect extension)
     """
-    ext = os.path.splitext(filename)[1].lower()
     text = ""
     if ext==".pdf":
         with pdfplumber.open(file_obj) as pdf:
@@ -21,4 +20,10 @@ def extract_text(file_obj, filename: str):
         for para in doc.paragraphs:
             if para.text.strip():
                 text+= para.text
+    elif ext == ".txt":
+        file_obj.seek(0)
+        text = file_obj.read().decode("utf-8")
+            
+    else:
+        return "Unsupported FIle"
     return text
