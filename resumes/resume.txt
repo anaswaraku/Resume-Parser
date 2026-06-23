@@ -1,0 +1,60 @@
+John Doe
+📞 9876543210 | ✉️ john.doe.dev@gmail.com
+🔗 LinkedIn: https://linkedin.com/in/johndoe-dev
+💻 GitHub: https://github.com/johndoe-dev
+________________________________________
+Professional Summary
+Motivated Computer Science graduate with a strong foundation in software development, machine learning, and web technologies. Skilled in building scalable applications and intelligent systems, including disease detection models and full-stack web applications. Passionate about problem-solving, clean code practices, and continuous learning. Seeking an entry-level position to contribute technical expertise and grow in a dynamic environment.
+________________________________________
+Education
+Bachelor of Technology in Computer Science
+ABC Institute of Technology, Bangalore, India
+Graduation: May 2026
+•	Relevant Coursework: Data Structures, Algorithms, DBMS, Operating Systems, Machine Learning
+•	GPA: 8.5/10
+________________________________________
+Technical Skills
+•	Programming Languages: Python, Java, C++, JavaScript
+•	Web Technologies: HTML, CSS, React.js, Node.js, Express.js
+•	Database: MySQL, MongoDB
+•	Tools & Platforms: Git, GitHub, Docker, VS Code
+•	Concepts: OOP, Data Structures & Algorithms, REST APIs, Machine Learning
+•	Operating Systems: Windows, Linux
+________________________________________
+Projects
+Disease Detection System – Python, TensorFlow
+•	Developed a machine learning model to detect diseases from medical images.
+•	Used Convolutional Neural Networks (CNN) for image classification.
+•	Achieved 92% accuracy on test dataset.
+•	GitHub: https://github.com/johndoe-dev/disease-detection
+________________________________________
+Full Stack Web Application – MERN Stack
+•	Built a responsive web application for task management and productivity tracking.
+•	Implemented user authentication, CRUD operations, and RESTful APIs.
+•	Improved UI using React and optimized backend with Node.js.
+•	GitHub: https://github.com/johndoe-dev/task-manager-app
+________________________________________
+Developer Utility Tool – Python CLI
+•	Created a command-line tool to automate file organization and cleanup.
+•	Reduced manual effort by 70% through automation scripts.
+•	Designed modular code for scalability and reusability.
+•	GitHub: https://github.com/johndoe-dev/dev-utility-tool
+________________________________________
+Work Experience / Internship
+Software Developer Intern – TechSolutions Pvt Ltd
+Jan 2026 – Apr 2026
+•	Assisted in developing backend services using Node.js and Express.
+•	Worked on debugging and improving application performance.
+•	Collaborated in Agile team meetings and code reviews.
+•	Contributed to API integration and documentation.
+________________________________________
+Achievements
+•	Solved 300+ problems on LeetCode and HackerRank
+•	Finalist in National Level Hackathon (2025)
+•	Certified in Python Programming (Coursera)
+________________________________________
+Additional Information
+•	Strong analytical and problem-solving skills
+•	Good communication and teamwork abilities
+•	Fast learner with adaptability to new technologies
+
