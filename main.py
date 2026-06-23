@@ -1,7 +1,7 @@
 #fastapi app + endpoints
-from fastapi import FastAPI, File, UploadFile, HTTPException
+from fastapi import FastAPI, File, UploadFile, HTTPException, Query
 from utils.file_extractor import extract_text
-
+from llm_parser import LLMParser
 from lexer import Lexer
 from parser import Parser
 
@@ -9,6 +9,8 @@ import os
 from dotenv import load_dotenv
 
 load_dotenv()
+
+llm_parser = LLMParser(api_key=os.getenv("GROQ_API_KEY"), model=os.getenv("LLM_MODEL"))
 
 app = FastAPI()
 
@@ -21,6 +23,7 @@ SUPPORTED_EXTENSIONS = {".pdf", ".docx", ".txt", ".rtf"}
 @app.post("/parse-resume-hybrid")
 async def parse_resume_hybrid(
     file: UploadFile = File(...),
+    use_llm: bool = Query(default=True)
 ):
     # Validate by file extension
     ext = os.path.splitext(file.filename)[-1].lower()
@@ -38,9 +41,12 @@ async def parse_resume_hybrid(
         )
 
     await file.seek(0)
-    lexer = Lexer()
     text = extract_text(file.file, ext)
-    tokens = lexer.tokenize(text)
-    parser = Parser(tokens, text)
-    ast = parser.parse()
-    return ast.model_dump_json(indent=2)
+    if use_llm:
+        return(llm_parser.parse_with_llm(text))
+    else:
+        lexer = Lexer()
+        tokens = lexer.tokenize(text)
+        parser = Parser(tokens, text)
+        ast = parser.parse()
+        return ast
