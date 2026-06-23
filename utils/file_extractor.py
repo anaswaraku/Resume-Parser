@@ -2,6 +2,13 @@ import pdfplumber
 from docx import Document
 from striprtf.striprtf import rtf_to_text
 
+import re 
+
+def clean_text(text):
+    text = re.sub(r'\n+','\n', text)
+    text = re.sub(r' +',' ', text)
+    return text.strip()
+
 def extract_text(file_obj, ext: str):
     """
     Extract text from an uploaded file without saving to disk.
@@ -30,4 +37,4 @@ def extract_text(file_obj, ext: str):
             
     else:
         return "Unsupported FIle"
-    return text
+    return clean_text(text)
