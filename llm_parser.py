@@ -1,6 +1,7 @@
 from groq import Groq
 import json
 import logging
+import re
 
 import os
 from dotenv import load_dotenv
@@ -52,17 +53,26 @@ class LLMParser:
                     }
                 ]
             )
-            llm_output =  response.choices[0].message.content
+            llm_output = response.choices[0].message.content
+            
+            # Clean Markdown formatting if present
+            content = llm_output.strip() if llm_output else ""
+            if "```" in content:
+                match = re.search(r"```(?:json)?\s*(.*?)\s*```", content, re.DOTALL)
+                if match:
+                    content = match.group(1).strip()
+            
             try:
-                data = json.loads(llm_output)
+                data = json.loads(content)
             except json.JSONDecodeError as e:
                 logger.exception("Invalid JSON")
-                return ResumeData
+                return ResumeData()
             try:
                 return ResumeData(**data)
             except ValidationError as e:
-                logger.exception("Schemaa Validation Error")
-        except:
+                logger.exception("Schema Validation Error")
+                return ResumeData()
+        except Exception as e:
             logger.exception("Groq api error")
             return ResumeData()
 
@@ -86,6 +96,7 @@ Rules:
 
 
 
-txt = file_extractor.extract_text("resumes/resume.pdf",".pdf")
-parser  = LLMParser(api_key= os.getenv("GROQ_API_KEY"),model=os.getenv("LLM_MODEL"))
-parser.parse_with_llm(txt)
+txt = file_extractor.extract_text("C:/Users/anasw/OneDrive/Documents/Personal/Resume/Resume-AnaswaraKU.pdf", ".pdf")
+parser = LLMParser(api_key=os.getenv("GROQ_API_KEY"), model=os.getenv("LLM_MODEL"))
+result = parser.parse_with_llm(txt)
+print(result.model_dump_json(indent=2))
