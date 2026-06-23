@@ -1,6 +1,6 @@
-import os
 import pdfplumber
 from docx import Document
+from striprtf.striprtf import rtf_to_text
 
 def extract_text(file_obj, ext: str):
     """
@@ -23,6 +23,10 @@ def extract_text(file_obj, ext: str):
     elif ext == ".txt":
         file_obj.seek(0)
         text = file_obj.read().decode("utf-8")
+    elif ext==".rtf":
+        file_obj.seek(0)
+        rtf_content = file_obj.read().decode("utf-8",errors="ignore")
+        text = rtf_to_text(rtf_content).encode("utf-8", "ignore").decode("utf-8")
             
     else:
         return "Unsupported FIle"
