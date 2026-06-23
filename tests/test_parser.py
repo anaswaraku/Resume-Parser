@@ -2,7 +2,7 @@ from lexer import Lexer
 from parser import Parser
 from utils import file_extractor
 
-txt = file_extractor.extract_text("resumes/resume.pdf",".pdf")
+txt = file_extractor.extract_text_from_pdf("resumes/resume.pdf")
 lexer= Lexer()
 tokens = lexer.tokenize(txt)
 

@@ -96,7 +96,7 @@ Rules:
 
 
 
-txt = file_extractor.extract_text("C:/Users/anasw/OneDrive/Documents/Personal/Resume/Resume-AnaswaraKU.pdf", ".pdf")
+txt = file_extractor.extract_text_from_pdf("C:/Users/anasw/OneDrive/Documents/Personal/Resume/Resume-AnaswaraKU.pdf")
 parser = LLMParser(api_key=os.getenv("GROQ_API_KEY"), model=os.getenv("LLM_MODEL"))
 result = parser.parse_with_llm(txt)
 print(result.model_dump_json(indent=2))

@@ -4,7 +4,6 @@ from utils.file_extractor import extract_text
 
 from lexer import Lexer
 from parser import Parser
-from utils import file_extractor
 
 import os
 from dotenv import load_dotenv
@@ -27,13 +26,16 @@ async def parse_resume_hybrid(
     ext = os.path.splitext(file.filename)[-1].lower()
     if ext not in SUPPORTED_EXTENSIONS:
         raise HTTPException(
-            status_code=415,
-            detail=f"Unsupported file format '{ext}'. Supported formats: {', '.join(SUPPORTED_EXTENSIONS)}"
+            status_code=400,
+            detail=f"Unsupported file format: {ext}"
         )
 
     max_size = int(os.getenv("MAX_FILE_SIZE", 10_000_000))
     if file.size is not None and file.size > max_size:
-        raise HTTPException(status_code=413, detail="Large file size")
+        raise HTTPException(
+            status_code=400,
+            detail="File size exceeds 10MB limit"
+        )
 
     await file.seek(0)
     lexer = Lexer()
