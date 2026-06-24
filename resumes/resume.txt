@@ -7,7 +7,7 @@ Professional Summary
 Motivated Computer Science graduate with a strong foundation in software development, machine learning, and web technologies. Skilled in building scalable applications and intelligent systems, including disease detection models and full-stack web applications. Passionate about problem-solving, clean code practices, and continuous learning. Seeking an entry-level position to contribute technical expertise and grow in a dynamic environment.
 ________________________________________
 Education
-Bachelor of Technology in Computer Science
+B.Tech in Computer Science
 ABC Institute of Technology, Bangalore, India
 Graduation: May 2026
 •	Relevant Coursework: Data Structures, Algorithms, DBMS, Operating Systems, Machine Learning

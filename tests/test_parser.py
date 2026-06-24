@@ -8,7 +8,7 @@ token = t.tokenize(txt)
 
 from parser import LineBuilder,HeaderBuilder,ResumeParser
 l = LineBuilder()
-l=l.build(tokens=token)
-section = HeaderBuilder()
-s=section.build(lines=l)
+# l=l.build(tokens=token)
+# section = HeaderBuilder()
+# s=section.build(lines=l)
 print(ResumeParser().build(tokens=token))
