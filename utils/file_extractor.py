@@ -16,18 +16,6 @@ def extract_text_from_pdf(filepath: str) -> str:
     except Exception as e:
         raise RuntimeError(f"pdfplumber error: {e}")
 
-    try:
-        from PyPDF2 import PdfReader
-        pages = []
-        for page in PdfReader(filepath).pages:
-            t = page.extract_text()
-            if t: pages.append(t.strip())
-        return "\n\n".join(pages)
-    except ImportError:
-        raise RuntimeError("Install pdfplumber: pip install pdfplumber")
-    except Exception as e:
-        raise RuntimeError(f"PDF read error: {e}")
-
 
 def extract_text_from_docx(filepath: str) -> str:
     """DOCX → plain text. Reads paragraphs AND table cells (many resumes use tables)."""

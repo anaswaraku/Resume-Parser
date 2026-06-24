@@ -1,12 +1,14 @@
+
+
+from utils.file_extractor import extract_text_from_txt
+txt = extract_text_from_txt("resumes/resume.txt")
 from lexer import Lexer
-from parser import Parser
-from utils import file_extractor
+t = Lexer()
+token = t.tokenize(txt)
 
-txt = file_extractor.extract_text_from_pdf("resumes/resume.pdf")
-lexer= Lexer()
-tokens = lexer.tokenize(txt)
-
-parser=Parser(tokens,txt)
-ast = parser.parse()
-
-print(ast.model_dump_json(indent=2))
+from parser import LineBuilder,HeaderBuilder,ResumeParser
+l = LineBuilder()
+l=l.build(tokens=token)
+section = HeaderBuilder()
+s=section.build(lines=l)
+print(ResumeParser().build(tokens=token))

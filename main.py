@@ -2,7 +2,7 @@ from fastapi import FastAPI, File, UploadFile, HTTPException, Query
 from utils.file_extractor import extract_text_from_pdf, extract_text_from_docx, extract_text_from_txt
 from llm_parser import LLMParser
 from lexer import Lexer
-from parser import Parser
+from parser import ResumeParser
 
 import os
 import tempfile
@@ -75,5 +75,5 @@ async def parse_resume_hybrid(
             raise HTTPException(status_code=500, detail=f"LLM parsing failed: {e}")
     else:
         tokens = Lexer().tokenize(text)
-        ast = Parser(tokens).parse()
-        return ast
+        sections = ResumeParser().build(tokens=tokens)
+        return sections
