@@ -1,93 +1,83 @@
-import pdfplumber
-from docx import Document
-from striprtf.striprtf import rtf_to_text
+import re
 
-import re 
-
-def decode_bytes(bytes_content) -> str:
-    """
-    Safely decode bytes content.
-    Try UTF-8, then CP1252/Windows-1252, and finally fallback to UTF-8 with errors replaced.
-    """
-    try:
-        return bytes_content.decode("utf-8")
-    except UnicodeDecodeError:
-        pass
-    try:
-        return bytes_content.decode("cp1252")
-    except UnicodeDecodeError:
-        pass
-    return bytes_content.decode("utf-8", errors="replace")
-
-def clean_text(text):
-    # Normalize line endings
-    text = text.replace('\r\n', '\n').replace('\r', '\n')
-    # Collapse 3 or more consecutive newlines to exactly 2 newlines (preserves paragraph separation)
-    text = re.sub(r'\n{3,}', '\n\n', text)
-    # Collapse multiple spaces/tabs to a single space
-    text = re.sub(r'[ \t]+', ' ', text)
-    return text.strip()
-
-def extract_text(file_obj, ext: str):
-    """
-    Extract text from an uploaded file without saving to disk.
-    file_obj: file-like object
-    filename: original filename (to detect extension)
-    """
-    text = ""
-    if ext == ".pdf":
-        with pdfplumber.open(file_obj) as pdf:
-            for page in pdf.pages:
-                page_text = page.extract_text()
-                if page_text:
-                    text += page_text + "\n"
-    elif ext == ".docx":
-        doc = Document(file_obj)
-        parts = []
-        # Extract paragraph text
-        for para in doc.paragraphs:
-            if para.text.strip():
-                parts.append(para.text)
-        # Extract table text
-        for table in doc.tables:
-            for row in table.rows:
-                row_text = " | ".join(cell.text.strip() for cell in row.cells if cell.text.strip())
-                if row_text:
-                    parts.append(row_text)
-        text = "\n\n".join(parts)
-    elif ext == ".txt":
-        file_obj.seek(0)
-        text = decode_bytes(file_obj.read())
-    elif ext == ".rtf":
-        file_obj.seek(0)
-        rtf_content = decode_bytes(file_obj.read())
-        # Convert RTF formatting to plain text
-        text = rtf_to_text(rtf_content)
-        # Combine surrogate pairs into single characters to preserve emojis and avoid encoding crashes
-        try:
-            text = text.encode("utf-16", "surrogatepass").decode("utf-16")
-        except Exception:
-            pass
-    else:
-        return "Unsupported FIle"
-    return clean_text(text)
 
 def extract_text_from_pdf(filepath: str) -> str:
-    """Extract text from a PDF file path."""
-    with open(filepath, "rb") as f:
-        return extract_text(f, ".pdf")
+    """PDF → plain text, page structure preserved. Tries pdfplumber, falls back to PyPDF2."""
+    try:
+        import pdfplumber
+        pages = []
+        with pdfplumber.open(filepath) as pdf:
+            for page in pdf.pages:
+                t = page.extract_text()
+                if t: pages.append(t.strip())
+        return "\n\n".join(pages)
+    except ImportError:
+        pass
+    except Exception as e:
+        raise RuntimeError(f"pdfplumber error: {e}")
+
+    try:
+        from PyPDF2 import PdfReader
+        pages = []
+        for page in PdfReader(filepath).pages:
+            t = page.extract_text()
+            if t: pages.append(t.strip())
+        return "\n\n".join(pages)
+    except ImportError:
+        raise RuntimeError("Install pdfplumber: pip install pdfplumber")
+    except Exception as e:
+        raise RuntimeError(f"PDF read error: {e}")
+
 
 def extract_text_from_docx(filepath: str) -> str:
-    """Extract text from a DOCX file path."""
-    with open(filepath, "rb") as f:
-        return extract_text(f, ".docx")
+    """DOCX → plain text. Reads paragraphs AND table cells (many resumes use tables)."""
+    try:
+        from docx import Document
+    except ImportError:
+        raise RuntimeError("Install python-docx: pip install python-docx")
+    try:
+        doc = Document(filepath)
+        lines = [p.text.strip() for p in doc.paragraphs if p.text.strip()]
+        for table in doc.tables:
+            for row in table.rows:
+                cells = [c.text.strip() for c in row.cells if c.text.strip()]
+                if cells: lines.append("  ".join(cells))
+        return "\n".join(lines)
+    except Exception as e:
+        raise RuntimeError(f"DOCX read error: {e}")
+
 
 def extract_text_from_txt(filepath: str) -> str:
-    """Extract text from a TXT file path."""
-    with open(filepath, "rb") as f:
-        return extract_text(f, ".txt")
+    """TXT/RTF → plain text. Encoding order: utf-8-sig → utf-8 → latin-1."""
+    content = ""
+    for enc in ("utf-8-sig", "utf-8", "latin-1"):
+        try:
+            with open(filepath, "r", encoding=enc) as f:
+                content = f.read()
+            break
+        except UnicodeDecodeError:
+            continue
+        except Exception as e:
+            raise RuntimeError(f"File read error: {e}")
 
-def extract_text_from_rtf(filepath: str) -> str:
-    """Extract text from an RTF file path."""
-    with open(filepath, "rb") as f:
-        return extract_text(f, ".rtf")
+    if not content:
+        raise RuntimeError("Could not decode file with any supported encoding.")
+
+    if filepath.lower().endswith(".rtf"):
+        content = _strip_rtf(content)
+
+    return content
+
+
+def _strip_rtf(text: str) -> str:
+    """Remove RTF control sequences, preserve paragraph breaks."""
+    text = re.sub(r'\\par\b|\\line\b', '\n', text, flags=re.I)
+    text = re.sub(r'\\u(-?\d+)\?', lambda m: chr(int(m.group(1)) % 65536), text)
+    prev = None
+    while prev != text:                          # iteratively remove nested braces
+        prev = text
+        text = re.sub(r'\{[^{}]*\}', ' ', text)
+    text = re.sub(r'\\[a-z]+\-?\d*\s?', ' ', text)
+    text = re.sub(r'[{}\\]', ' ', text)
+    lines = [re.sub(r'[ \t]+', ' ', ln).strip() for ln in text.split('\n')]
+    return '\n'.join(ln for ln in lines if ln)

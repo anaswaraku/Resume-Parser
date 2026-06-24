@@ -1,257 +1,354 @@
-# parser.py
+"""
+Syntactic Analysis (Top-Down / Recursive Descent Parser).
 
-import nltk
-import spacy
-from nltk.corpus import stopwords
-from typing import List, Optional
+The hierarchy:
+    ResumeAST                        ← root node
+    ├── name, email, phone           ← contact fields (leaf nodes)
+    ├── education: List[Education]   ← section node → entry nodes
+    │     └── Education              ← entry node → degree, school, dates (leaves)
+    ├── experience: List[Experience] ← section node → entry nodes
+    │     └── Experience             ← entry node → company, role, dates, desc
+    └── skills: List[str]            ← section node → leaf list
+
+Grammar (informal BNF):
+    resume       ::= contact section*
+    contact      ::= name? email? phone?
+    section      ::= section_header entry+
+    entry        ::= field+
+    field        ::= TOKEN+
+
+The parser is truly hierarchical because:
+  1. It first identifies the top-level section boundaries.
+  2. Then recurses into each section to identify entry boundaries.
+  3. Then recurses into each entry to extract individual fields.
+Each level only knows about its own grammar rule.
+"""
+
+from typing import List, Optional, Set
 from lexer import Token
 from ast_models import ResumeAST, Education, Experience
 
 
-nltk.download('stopwords', quiet=True)
-nlp = spacy.load("en_core_web_sm")
-STOPWORDS = set(stopwords.words('english'))
+#/Section keyword 
+
+EDU_KW   = {"education","academic","academics","qualification","qualifications","degree","study","studies","schooling"}
+EXP_KW   = {"experience","employment","work","career","history","professional","positions","jobs","internship","internships"}
+SKILL_KW = {"skills","skill","technologies","tools","competencies","expertise","proficiencies","technical","stack","languages","frameworks"}
+ALL_KW   = EDU_KW | EXP_KW | SKILL_KW
+
+#/Degree vocabulary 
+
+_DEG_ABBREV = {"bsc","ba","bs","beng","btech","msc","ma","ms","meng","mtech",
+               "mba","phd","dphil","edd","associate","diploma","certificate","hnd"}
+_DEG_START  = {"bachelor","master","doctor","doctorate"}
+_DEG_NEXT   = {"of","in","science","arts","engineering","technology","business","commerce"}
+
+#/Role vocabulary/
+
+_ROLE_KW = {"engineer","developer","manager","director","analyst","designer",
+            "consultant","lead","architect","specialist","intern","associate",
+            "officer","executive","head","vp","president","coordinator",
+            "scientist","researcher","founder","cto","ceo","coo","cfo","senior","junior"}
+
+#/School vocabulary
+
+_SCHOOL_KW = {"university","college","institute","school","academy","polytechnic","iit","mit","bits"}
 
 
-SECTION_HEADERS = {
-    'education':'EDUCATION',
-    'experience':'EXPERIENCE',
-    'work':'EXPERIENCE',
-    'employment':'EXPERIENCE',
-    'skills':'SKILLS',
-    'technologies':'SKILLS',
-    'summary':'SUMMARY',
-    'objective':'SUMMARY',
-    'certifications':'CERTIFICATIONS',
-    'projects':'PROJECTS',
-    }
+#/Internal node: a named group of token-lines ────────────────────────────
+
+class _SectionNode:
+    """
+    Intermediate AST node representing one resume section.
+    Holds the parsed lines that belong to it; consumed by section parsers.
+    """
+    __slots__ = ("name", "lines")
+
+    def __init__(self, name: str):
+        self.name  = name
+        self.lines: List[List[Token]] = []
+
+
+#/Helpers/────────
+
+def _words(line):   return [t.value for t in line if t.type == "WORD"]
+def _dates(line):   return [t.value for t in line if t.type == "DATE"]
+def _text(line):
+    out, prev_sep = [], False
+    for t in line:
+        if t.type == "SEPARATOR":
+            prev_sep = True
+        elif t.type != "NEWLINE":
+            if out and not prev_sep:
+                out.append(" ")
+            out.append(t.value)
+            prev_sep = False
+    return "".join(out).strip()
+
+def _has_degree(words):
+    low = [w.lower() for w in words]
+    if any(w in _DEG_ABBREV for w in low):
+        return True
+    for i, w in enumerate(low):
+        if w in _DEG_START and i+1 < len(low) and low[i+1] in _DEG_NEXT:
+            return True
+    return False
+
+def _has_role(words):
+    return any(w.lower() in _ROLE_KW for w in words)
+
+def _has_school(words):
+    return any(w.lower() in _SCHOOL_KW for w in words)
+
+
+#/Parser/─────────
 
 class Parser:
-    def __init__(self, tokens: List[Token], raw_text: str):
-        self.tokens = tokens
-        self.raw_text = raw_text
-        self.pos = 0
-        self.ast = ResumeAST()
-        self.doc = nlp(raw_text)  # spaCy runs once on full text
 
-    # ── Entry Point ───────────────────────────────────────────
+    def __init__(self, tokens: List[Token]):
+        self._tokens = tokens
+        self._lines  = self._build_lines()
+
+    #/Public/──────
+
     def parse(self) -> ResumeAST:
-        self._extract_contact_info()  # Lexer tokens → email, phone
-        self._extract_name()          # spaCy NER → PERSON
-        self._parse_body()            # section by section
-        return self.ast
+        """
+        Top-level parse call.  Three recursive stages:
+          1. _parse_contact()   — scans full token stream for contact fields
+          2. _parse_sections()  — splits stream into _SectionNode objects
+          3. _parse_<type>()    — recurses into each section to build entries
+        """
+        ast = ResumeAST()
+        ast.name,  ast.email, ast.phone = self._parse_contact()
+        for section in self._parse_sections():
+            key = section.name
+            if key in EDU_KW:
+                ast.education  = self._parse_education(section)
+            elif key in EXP_KW:
+                ast.experience = self._parse_experience(section)
+            elif key in SKILL_KW:
+                ast.skills     = self._parse_skills(section)
+        return ast
 
-    # ── 1. Contact Info (Lexer tokens) ────────────────────────
-    def _extract_contact_info(self):
-        for token in self.tokens:
-            if token.type == 'EMAIL' and not self.ast.email:
-                self.ast.email = token.value
-            if token.type == 'PHONE' and not self.ast.phone:
-                self.ast.phone = token.value
+    #/Stage 0: build line list (single pass, shared) ──────────────────────
 
-    # ── 2. Name (spaCy NER) ───────────────────────────────────
-    def _extract_name(self):
-        for ent in self.doc.ents:
-            if ent.label_ == 'PERSON':
-                self.ast.name = ent.text
-                break  # first PERSON = candidate name
-
-    # ── 3. Section Body ───────────────────────────────────────
-    def _parse_body(self):
-        while self.current():
-            self._skip_newlines()
-            t = self.current()
-            if not t:
-                break
-
-            if self._is_section_header(t):
-                section = SECTION_HEADERS[t.value.lower()]
-                self.consume()
-                self._skip_newlines()
-                self._parse_section(section)
+    def _build_lines(self) -> List[List[Token]]:
+        lines, cur = [], []
+        for tok in self._tokens:
+            if tok.type == "NEWLINE":
+                lines.append(cur)
+                cur = []
             else:
-                self.consume()  # skip pre-section content
-
-    def _parse_section(self, section: str):
-        {
-            'EDUCATION': self._parse_education,
-            'EXPERIENCE': self._parse_experience,
-            'SKILLS': self._parse_skills,
-            'SUMMARY': self._parse_summary,
-        }.get(section, self._skip_section)()
-
-    # ── 4. Education ──────────────────────────────────────────
-    def _parse_education(self):
-        for line in self._collect_lines():
-            dates = [t.value for t in line if t.type == 'DATE']
-            words = [t.value for t in line if t.type == 'WORD']
-
-            if not words:
-                continue
-
-            # spaCy finds university/college name
-            line_doc = nlp(' '.join(t.value for t in line))
-            school = next(
-                (ent.text for ent in line_doc.ents if ent.label_ == 'ORG'),
-                None
-            )
-
-            school_words = set(school.split()) if school else set()
-            degree = ' '.join(w for w in words if w not in school_words)
-
-            self.ast.education.append(
-                Education(
-                    degree=degree.strip() or None,
-                    school=school,
-                    start_date=dates[0] if len(dates) > 0 else None,
-                    end_date=dates[1] if len(dates) > 1 else None,
-                )
-            )
-
-    # ── 5. Experience ─────────────────────────────────────────
-    def _parse_experience(self):
-        for line in self._collect_lines():
-            dates = [t.value for t in line if t.type == 'DATE']
-            words = [t.value for t in line if t.type == 'WORD']
-
-            if not words:
-                continue
-
-            # spaCy finds company name
-            line_doc = nlp(' '.join(t.value for t in line))
-            company = next(
-                (ent.text for ent in line_doc.ents if ent.label_ == 'ORG'),
-                None
-            )
-
-            company_words = set(company.split()) if company else set()
-            role = ' '.join(w for w in words if w not in company_words)
-
-            self.ast.experience.append(
-                Experience(
-                    company=company,
-                    role=role.strip() or None,
-                    start_date=dates[0] if len(dates) > 0 else None,
-                    end_date=dates[1] if len(dates) > 1 else None,
-                )
-            )
-
-    # ── 6. Skills ─────────────────────────────────────────────
-    def _parse_skills(self):
-        seen = set(self.ast.skills)
-
-        for line in self._collect_lines():
-            for token in line:
-                if (
-                    token.type == 'WORD'
-                    and token.value.lower() not in STOPWORDS
-                    and token.value not in seen
-                    and len(token.value) > 1
-                ):
-                    self.ast.skills.append(token.value)
-                    seen.add(token.value)
-
-    # ── 7. Summary ────────────────────────────────────────────
-    def _parse_summary(self):
-        lines = self._collect_lines()
-        words = [t.value for line in lines for t in line if t.type == 'WORD']
-        self.ast.summary = ' '.join(words) or None
-
-    # ── Helpers ───────────────────────────────────────────────
-    def _collect_lines(self) -> List[List[Token]]:
-        """Groups tokens into lines."""
-        lines = []
-        current_line = []
-
-        while self.current() and not self._is_section_header(self.current()):
-            t = self.current()
-
-            if t.type == 'NEWLINE':
-                if current_line:
-                    lines.append(current_line)
-                    current_line = []
-                self.consume()
-            else:
-                current_line.append(self.consume())
-
-        if current_line:
-            lines.append(current_line)
-
+                cur.append(tok)
+        if cur:
+            lines.append(cur)
         return lines
 
-    def _is_section_header(self, token: Optional[Token]) -> bool:
-        return (
-            token is not None
-            and token.type == 'WORD'
-            and token.value.lower() in SECTION_HEADERS
-        )
+    #/Stage 1: contact parsing ─────────────────────────────────────────────
 
-    def _skip_newlines(self):
-        while self.current() and self.current().type == 'NEWLINE':
-            self.consume()
+    def _parse_contact(self):
+        """
+        Scans the full token stream.
+        Name: scored heuristic over the first 8 non-empty lines.
+          +2 for 2-4 Title-Case WORD tokens
+          +1 if all words are Title-Cased
+          -5 if first word is a section/role keyword
+          disqualified if line contains EMAIL/PHONE/URL/NUMBER
+        """
+        email = phone = None
+        for tok in self._tokens:
+            if tok.type == "EMAIL" and not email:
+                email = tok.value
+            elif tok.type == "PHONE" and not phone:
+                phone = tok.value
 
-    def _skip_section(self):
-        self._collect_lines()  # discard unknown section
+        name, best = None, -99
+        checked = 0
+        for line in self._lines:
+            if not line: continue
+            checked += 1
+            if checked > 8: break
+            types = {t.type for t in line}
+            if types & {"EMAIL","PHONE","URL","NUMBER"}: continue
+            ws = _words(line)
+            if not ws: continue
+            score  = 2 if 2 <= len(ws) <= 4 else 0
+            score += 1 if all(w[0].isupper() for w in ws) else 0
+            score -= 5 if ws[0].lower() in ALL_KW else 0
+            score -= 3 if ws[0].lower() in _ROLE_KW else 0
+            if score > best:
+                best, name = score, " ".join(ws)
 
-    def current(self) -> Optional[Token]:
-        return self.tokens[self.pos] if self.pos < len(self.tokens) else None
+        return (name if best >= 2 else None), email, phone
 
-    def consume(self) -> Optional[Token]:
-        t = self.current()
-        self.pos += 1
-        return t
-    
+    #/Stage 2: section splitting ────────────────────────────────────────────
 
-txt = """RESUME
+    def _parse_sections(self) -> List[_SectionNode]:
+        """
+        Identifies section headers and groups subsequent lines under them.
+        A line is a header when its first token is a keyword WORD and
+        the line contains ≤ 3 tokens total (avoids grabbing content lines
+        that happen to start with a keyword).
+        """
+        sections: List[_SectionNode] = []
+        current: Optional[_SectionNode] = None
 
-Name: Ananya Sharma  
-Email: ananya.sharma@email.com  
-Phone: +91 98765 43210  
-Date of Birth: 15 March 2000  
+        for line in self._lines:
+            non_empty = [t for t in line if t.type != "NEWLINE"]
+            if not non_empty:
+                continue
+            first = non_empty[0]
+            is_header = (
+                first.type == "WORD"
+                and first.value.lower() in ALL_KW
+                and len(non_empty) <= 3
+            )
+            if is_header:
+                current = _SectionNode(first.value.lower())
+                sections.append(current)
+            elif current:
+                current.lines.append(line)
 
-----------------------------------------
+        return sections
 
-Objective:
-Motivated and detail-oriented individual seeking an entry-level position to utilize skills and grow professionally.
+    #/Stage 3a: education ───────────────────────────────────────────────────
 
-----------------------------------------
+    def _parse_education(self, section: _SectionNode) -> List[Education]:
+        """
+        Hierarchical entry detection:
+          For each line, classify it as: degree | school | date | other.
+          A new degree line signals a new entry → flush the previous one.
 
-Education:
-Bachelor of Science in Computer Science  
-XYZ University, Kerala  
-2021 – 2024  
+        Entry grammar:
+            education_entry ::= degree_line school_line? date_line?
+        """
+        entries = []
+        cur_degree = cur_school = None
+        cur_dates: List[str] = []
 
-Higher Secondary (12th Grade)  
-ABC Higher Secondary School  
-2019 – 2021  
+        def flush():
+            nonlocal cur_degree, cur_school, cur_dates
+            if cur_degree or cur_school:
+                entries.append(Education(
+                    degree=cur_degree, school=cur_school,
+                    start_date=cur_dates[0] if len(cur_dates) > 0 else None,
+                    end_date  =cur_dates[1] if len(cur_dates) > 1 else None,
+                ))
+            cur_degree = cur_school = None
+            cur_dates = []
 
-Secondary School (10th Grade)  
-ABC High School  
-2018 – 2019  
+        for line in section.lines:
+            ws, ds = _words(line), _dates(line)
+            if not ws and not ds: continue
+            if _has_degree(ws):
+                if cur_degree: flush()          # new entry starts
+                cur_degree = _text(line)
+                if ds: cur_dates = ds
+            elif _has_school(ws):
+                cur_school = _text(line)
+                if ds: cur_dates = ds
+            elif ds:
+                cur_dates = ds
 
-----------------------------------------
+        flush()
+        return entries
 
-Skills:
-- Basic Programming (Python, Java)  
-- MS Office (Word, Excel, PowerPoint)  
-- Communication Skills  
-- Teamwork and Problem Solving  
+    #/Stage 3b: experience ──────────────────────────────────────────────────
 
-----------------------------------------
+    def _parse_experience(self, section: _SectionNode) -> List[Experience]:
+        """
+        Hierarchical entry detection with look-ahead:
+          Each entry = company → role → dates → description lines.
+          A new company is detected by peeking at the next line — if it
+          contains a role keyword or date, the current line is a new company.
 
-Experience:
-Fresher
+        Entry grammar:
+            experience_entry ::= company_line role_line? date_line? desc_line*
+        """
+        entries = []
+        cur_company = cur_role = None
+        cur_dates: List[str] = []
+        cur_desc: List[str] = []
 
-----------------------------------------
+        def flush():
+            nonlocal cur_company, cur_role, cur_dates, cur_desc
+            if cur_company or cur_role:
+                entries.append(Experience(
+                    company    = cur_company,
+                    role       = cur_role,
+                    start_date = cur_dates[0] if len(cur_dates) > 0 else None,
+                    end_date   = cur_dates[1] if len(cur_dates) > 1 else None,
+                    description= ". ".join(cur_desc) or None,
+                ))
+            cur_company = cur_role = None
+            cur_dates = []
+            cur_desc = []
 
-Declaration:
-I hereby declare that the information provided above is true and correct to the best of my knowledge.
+        active = [ln for ln in section.lines if ln]
 
-----------------------------------------
+        state = "start"
+        for idx, line in enumerate(active):
+            ws, ds, txt = _words(line), _dates(line), _text(line)
+            if not ws and not ds: continue
 
-Place: Cochin  
-Date: 22 June 2026  
+            # date-only lines (≤4 words + has dates)
+            if ds and len(ws) <= 4:
+                if not cur_dates: cur_dates = ds
+                continue
 
-Signature:  
-Ananya Sharma"""
+            # role line
+            if _has_role(ws) and state in ("start", "company", "role"):
+                cur_role = txt
+                state = "desc"
+                continue
 
+            # look-ahead: short Title-Case line while in desc/role state
+            # → peek next line; if it has a role/date, this is a new company
+            if state in ("desc", "role") and 1 <= len(ws) <= 5 and ws[0][0].isupper() and not ds:
+                next_line = active[idx+1] if idx+1 < len(active) else []
+                nw = _words(next_line)
+                nd = _dates(next_line)
+                if _has_role(nw) or nd:
+                    flush()
+                    cur_company = txt
+                    state = "role"
+                    continue
+
+            # first line = company
+            if state in ("start", "company"):
+                cur_company = txt
+                state = "role"
+            else:
+                cur_desc.append(txt)
+
+        flush()
+        return entries
+
+    #/Stage 3c: skills ──────────────────────────────────────────────────────
+
+    def _parse_skills(self, section: _SectionNode) -> List[str]:
+        """
+        SEPARATOR tokens from the Lexer act as explicit boundaries.
+        Consecutive WORD tokens between separators = one multi-word skill.
+        e.g. "Machine Learning, Python" → ["Machine Learning", "Python"]
+        """
+        skills: List[str] = []
+        seen: Set[str] = set()
+        buf: List[str] = []
+
+        def flush():
+            skill = " ".join(buf).strip()
+            if skill and len(skill) > 1 and skill.lower() not in seen:
+                seen.add(skill.lower())
+                skills.append(skill)
+            buf.clear()
+
+        for line in section.lines:
+            for tok in line:
+                if tok.type == "WORD":
+                    buf.append(tok.value)
+                elif tok.type == "SEPARATOR":
+                    flush()
+            flush()  # end of line
+
+        return sorted(skills)
