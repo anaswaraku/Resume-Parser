@@ -8,6 +8,7 @@ class Education(BaseModel):
     school: Optional[str] = None
     start_date: Optional[str] = None
     end_date: Optional[str] = None
+    description: Optional[str] = None
 
 
 class Experience(BaseModel):

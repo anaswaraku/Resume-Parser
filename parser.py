@@ -26,7 +26,7 @@ from dateutil import parser as date_parser
 from dataclasses import dataclass, field
 from typing import List
 
-DATE_TYPES = {"DATE", "DATE_RANGE", "YEAR_RANGE", "DATE_DMY", "YEAR"}
+DATE_TYPES = {"DATE", "DATE_RANGE", "YEAR_RANGE", "DATE_DMY", "YEAR","PRESENT"}
 
 
 @dataclass
@@ -50,6 +50,8 @@ class ParseContext:
             "bachelor",
             "master",
             "phd",
+            "PhD"
+            "P.hd",
             "doctorate",
             "diploma",
             "associate",
@@ -61,7 +63,8 @@ class ParseContext:
             "master of engineering",
             "bachelor of arts",
             "master of business administration",
-        }
+            "phd in"
+        } 
     )
     school_keywords: Set[str] = field(
         default_factory=lambda: {
@@ -81,7 +84,8 @@ class ParseContext:
             "inc",
             "ltd",
             "llc",
-            "pvt",
+            "pvt.",
+            "pvt. ltd",
             "corp",
             "co",
             "technologies",
@@ -212,12 +216,17 @@ class Normalizer:
         (re.compile(r'\bwork\s+history\b',            re.I), "experience"),    
         (re.compile(r'\bprofessional\s+experience\b', re.I), "experience"),    
         (re.compile(r'\bwork\s+experience\b',         re.I), "experience"),    
-        (re.compile(r'\bemployment\s+history\b',      re.I), "experience"),    
+        (re.compile(r'\bemployment\s+history\b',      re.I), "experience"),
+        (re.compile(r'\bresearch\s+experience\b',     re.I), "experience"),
         (re.compile(r'\bacademic\s+background\b',     re.I), "education"),    
-        (re.compile(r'\beducational\s+qualification', re.I), "education"),    
+        (re.compile(r'\beducational\s+qualification', re.I), "education"),
+        (re.compile(r'\bacademic\s+details\b',        re.I), "education"),
+        (re.compile(r'\beducation\s+&\s+credentials\b',re.I), "education"),
         (re.compile(r'\btechnical\s+skills\b',        re.I), "skills"),    
         (re.compile(r'\bcore\s+competencies\b',       re.I), "skills"),    
-        (re.compile(r'\bkey\s+skills\b',              re.I), "skills"),    
+        (re.compile(r'\bkey\s+skills\b',              re.I), "skills"),
+        (re.compile(r'\bcomputer\s+skills\b',         re.I), "skills"),
+        (re.compile(r'\bskill\s+set\b',               re.I), "skills"),    
     ]
  
  
@@ -254,16 +263,36 @@ class Normalizer:
 #Block helper (shared by Education and Experience) 
 
 def split_into_blocks(lines: List[Line]) -> List[List[Line]]:
-    """Split a section's lines into entry blocks on blank lines."""
+    """Split a section's lines into entry blocks on blank lines or when multiple strong dates are encountered."""
     blocks: List[List[Line]] = []
     current: List[Line] = []
+    has_date = False
+
+    def _has_strong_date(line: Line) -> bool:
+        date_tokens = [t for t in line.tokens if t.type in {"DATE_RANGE", "YEAR_RANGE", "DATE_DMY", "DATE"}]
+        if any(t.type in {"DATE_RANGE", "YEAR_RANGE"} for t in date_tokens):
+            return True
+        if len(date_tokens) >= 2:
+            return True
+        return False
+
     for line in lines:
         if line.is_blank():
             if current:
                 blocks.append(current)
                 current = []
+                has_date = False
         else:
-            current.append(line)
+            line_has_date = _has_strong_date(line)
+            if line_has_date and has_date:
+                blocks.append(current)
+                current = [line]
+                has_date = True
+            else:
+                current.append(line)
+                if line_has_date:
+                    has_date = True
+
     if current:
         blocks.append(current)
     return blocks
@@ -295,6 +324,7 @@ class EducationNode:
     school:     ParsedField = field(default_factory=lambda: ParsedField(None))
     start_date: ParsedField = field(default_factory=lambda: ParsedField(None))
     end_date:   ParsedField = field(default_factory=lambda: ParsedField(None))
+    description: List[str]  = field(default_factory=list)
 
 
 #EducationParser 
@@ -336,31 +366,68 @@ class EducationParser:
     def _parse_block(self, block: List[Line]) -> EducationNode:
         node = EducationNode()
 
+        # --- Filter out irrelevant lines ---
+        relevant_lines = []
         for line in block:
-            d  = self._score_degree(line)
-            s  = self._score_school(line)
-            dt = self._score_date_range(line)
+            l_lower = line.text_lower()
+            if not l_lower.startswith(("advisor:", "thesis:", "research:", "{ ranked")):
+                relevant_lines.append(line)
+        
+        if not relevant_lines:
+            return node
 
-            # Date range is the most unambiguous — assign first
-            if dt >= 0.9:
-                dates = line.extract_dates()
-                if dates:
-                    node.start_date = ParsedField(dates[0], dt)
-                    node.end_date   = ParsedField(dates[1] if len(dates) > 1 else None, dt)
+        # --- Extract Dates from the entire block ---
+        all_dates = []
+        for line in relevant_lines:
+            all_dates.extend(line.extract_dates())
+        if all_dates:
+            node.start_date = ParsedField(all_dates[0], 0.9)
+            if len(all_dates) > 1:
+                node.end_date = ParsedField(all_dates[-1], 0.9)
 
-            # Degree vs school — only if date didn't win
-            elif d >= s and d > 0.3 and node.degree.value is None:
-                node.degree = ParsedField(line.raw.strip(), d)
+        # --- Strategy 1: School on line 1, Degree on line 2 ---
+        if len(relevant_lines) >= 2 and self._score_school(relevant_lines[0]) > 0.7 and self._score_degree(relevant_lines[1]) > 0.5:
+            node.school = ParsedField(self._clean_text(relevant_lines[0].raw), 0.9)
+            node.degree = ParsedField(self._clean_text(relevant_lines[1].raw), 0.9)
+            return node
 
-            elif s > d and s > 0.3 and node.school.value is None:
-                node.school = ParsedField(line.raw.strip(), s)
+        # --- Strategy 2: Split squashed lines and tabular text ---
+        full_text = " ".join(l.raw for l in relevant_lines)
+        school_keyword_regex = r'\s+(' + '|'.join(self.ctx.school_keywords) + r')'
+        parts = re.split(school_keyword_regex, full_text, maxsplit=1, flags=re.I)
 
-            # Low-confidence fallback: first short line → degree, second → school
-            elif node.degree.value is None and line.word_count() <= 7:
-                node.degree = ParsedField(line.raw.strip(), 0.2)
+        if len(parts) > 2: # split results in 3 parts: [before, keyword, after]
+            degree_candidate = self._clean_text(parts[0])
+            school_and_desc = parts[1] + parts[2]
 
-            elif node.school.value is None and line.word_count() <= 6:
-                node.school = ParsedField(line.raw.strip(), 0.2)
+            # Heuristic: School name often ends at a period. The rest is description.
+            match = re.search(r'\.\s+', school_and_desc)
+            if match:
+                split_point = match.start()
+                school_text = school_and_desc[:split_point + 1]
+                desc_text = school_and_desc[split_point + 1:]
+            else:
+                school_text = school_and_desc
+                desc_text = ""
+
+            node.degree = ParsedField(degree_candidate, 0.7)
+            node.school = ParsedField(self._clean_text(school_text).strip(), 0.7)
+            if desc_text.strip():
+                node.description.append(self._clean_text(desc_text).strip())
+        else:
+            # --- Strategy 3: Fallback to best-scoring line ---
+            best_degree_line = max(relevant_lines, key=self._score_degree, default=None)
+            best_school_line = max(relevant_lines, key=self._score_school, default=None)
+
+            if best_degree_line and self._score_degree(best_degree_line) > 0.3:
+                node.degree = ParsedField(self._clean_text(best_degree_line.raw), 0.5)
+            
+            if best_school_line and self._score_school(best_school_line) > 0.3:
+                # If school and degree were found on the same line, clean the school text
+                # Only assign school if it's a different line from the degree,
+                # to avoid the school field being polluted on squashed lines.
+                if best_school_line != best_degree_line:
+                    node.school = ParsedField(self._clean_text(best_school_line.raw), 0.5)
 
         if node.degree.value is None:
             self.issues.append(ParseIssue(
@@ -371,6 +438,26 @@ class EducationParser:
 
         return node
 
+    def _clean_text(self, text: str) -> str:
+        """Removes dates, GPAs, and other noise from extracted strings."""
+        text = re.sub(r'\b(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[\s.,]+\d{4}', '', text, flags=re.I)
+        text = re.sub(r'\b(?:19|20)\d{2}\b', '', text)
+        text = re.sub(r'\b(gpa|cgpa|rank|score|cpi)[\s:.]*[\d./\s]+(out\s+of\s+\d+)?', '', text, flags=re.I)
+        text = text.replace("()", "")
+        return text.strip(" ,-•·▪▸*()")
+
+    #private helper 
+    def _assign_dates(self, line: Line, node: EducationNode | ExperienceNode, score: float):
+        """Extracts and assigns dates to a node if the score is high enough."""
+        if score < 0.8:
+            return
+        
+        dates = line.extract_dates()
+        if dates:
+            node.start_date = ParsedField(dates[0], score)
+            if len(dates) > 1:
+                node.end_date = ParsedField(dates[1], score)
+
     #scoring ────
 
     def _score_degree(self, line: Line) -> float:
@@ -380,8 +467,6 @@ class EducationParser:
             score += 0.8
         if line.word_count() <= 8:
             score += 0.1
-        if line.has_date():           # dates don't belong in a degree line
-            score -= 0.6
         if line.has_type("EMAIL"):
             score -= 0.9
         return max(0.0, min(score, 1.0))
@@ -393,8 +478,6 @@ class EducationParser:
             score += 0.75
         if 2 <= line.word_count() <= 6:
             score += 0.1
-        if line.has_date():
-            score -= 0.5
         return max(0.0, min(score, 1.0))
 
     def _score_date_range(self, line: Line) -> float:
@@ -413,11 +496,13 @@ class EducationParser:
 
     @staticmethod
     def _to_model(node: EducationNode) -> Education:
+        desc = " ".join(node.description) if node.description else None
         return Education(
             degree=node.degree.value     or "",
             school=node.school.value     or "",
             start_date=node.start_date.value,
             end_date=node.end_date.value,
+            description=desc,
         )
 #ExperienceNode (internal) ─
 
@@ -470,31 +555,45 @@ class ExperienceParser:
 
     def _parse_block(self, block: List[Line]) -> ExperienceNode:
         node = ExperienceNode()
+        
+        def _clean_text_from_dates(line: Line) -> str:
+            text = line.raw
+            for token in line.tokens:
+                if token.type in DATE_TYPES:
+                    text = text.replace(token.value, "")
+            return text.strip(" ,-")
 
         for line in block:
             # 1 — Date range (most unambiguous)
-            if self._score_date_range(line) >= 0.8:
-                dates = line.extract_dates()
-                if dates:
-                    node.start_date = ParsedField(dates[0], 0.95)
-                    node.end_date   = ParsedField(dates[1] if len(dates) > 1 else None, 0.95)
+            if not node.start_date.value:
+                self._assign_dates(line, node, self._score_date_range(line))
+
+            role_score = self._score_role(line)
+            company_score = self._score_company(line)
+
+            # 2 — Squashed line handling
+            if role_score > 0.5 and company_score > 0.4:
+                cleaned_text = _clean_text_from_dates(line)
+                if role_score>=company_score:
+                    if node.role.value is None:
+                        node.role = ParsedField(cleaned_text, role_score)
+                else:
+                    if node.company.value is None:
+                        node.company = ParsedField(cleaned_text, company_score)
                 continue
 
-            # 2 — Description line
+            # 3 — Description line
             if self._is_description(line):
                 node.description.append(line.raw.strip())
                 continue
-
-            # 3 — Role line
-            role_score = self._score_role(line)
+            # 4 — Role line
             if role_score > 0.5 and node.role.value is None:
-                node.role = ParsedField(line.raw.strip(), role_score)
+                node.role = ParsedField(_clean_text_from_dates(line), role_score)
                 continue
 
-            # 4 — Company line
-            company_score = self._score_company(line)
+            # 5 — Company line
             if company_score > 0.4 and node.company.value is None:
-                node.company = ParsedField(line.raw.strip(), company_score)
+                node.company = ParsedField(_clean_text_from_dates(line), company_score)
                 continue
 
             # 5 — Fallback: short lines fill company then role
@@ -511,6 +610,19 @@ class ExperienceParser:
             ))
 
         return node
+
+    #private helper
+    def _assign_dates(self, line: Line, node: EducationNode | ExperienceNode, score: float):
+        """Extracts and assigns dates to a node if the score is high enough."""
+        if score < 0.8:
+            return
+        
+        dates = line.extract_dates()
+        if dates:
+            node.start_date = ParsedField(dates[0], score)
+            if len(dates) > 1:
+                node.end_date = ParsedField(dates[1], score)
+
 
     #classifiers (section-specific — no global LineType enum) ────
 
@@ -540,8 +652,6 @@ class ExperienceParser:
             score += 0.7
         if line.word_count() <= 5:
             score += 0.1
-        if line.has_date():
-            score -= 0.5
         return max(0.0, min(score, 1.0))
 
     def _score_company(self, line: Line) -> float:
@@ -581,60 +691,62 @@ class SkillsParser:
     """
     Stage 6c — Skills section parsing.
 
-    Two formats handled:
-      - Separator-delimited  →  "Python, Django, REST APIs"
-      - One-per-line         →  each non-blank line is a skill
-    Multi-word skills (e.g. "Machine Learning") are preserved.
+    Upgraded to more robustly handle various formats by:
+    1. Pre-processing lines to strip category labels (e.g., "Languages:").
+    2. Consolidating all text into a single block.
+    3. Using a powerful regex to split on multiple delimiters (`,`, `|`, `•`, etc.).
+    4. Filtering the results against a more comprehensive list of non-skill keywords.
     """
 
     _STRIP_CHARS = ",.·•*▪▸-–— \t"
+    # A more comprehensive set of keywords to filter out.
+    _NON_SKILL_KEYWORDS: Set[str] = {
+        # Category headers
+        "skills", "technical", "computer", "professional", "soft", "hard",
+        "languages", "frameworks", "libraries", "tools", "platforms", "databases",
+        "concepts", "paradigms", "methodologies", "operating systems", "os",
+        "technologies", "competencies", "expertise", "systems",
+        # Filler/stop words
+        "proficient", "familiar", "experience", "experienced", "knowledge",
+        "other", "miscellaneous", "etc", "including", "technologies",
+        "and", "in", "with", "of", "for", "the", "a", "an", "at", "to",
+        "is", "are", "be", "strong", "good", "excellent", "working", "ability",
+    }
 
     def parse(self, section: Optional[Section]) -> List[str]:
         if section is None:
             return []
 
-        skills: List[str] = []
+        # 1. Pre-process lines to remove category labels and join them.
+        processed_lines = []
         for line in section.lines:
             if line.is_blank():
                 continue
+            
+            text = line.raw.strip(self._STRIP_CHARS)
+            
+            # Heuristic: If a line contains a colon, it might be a "Category: Skills" line.
+            if ':' in text:
+                parts = text.split(':', 1)
+                category_candidate = parts[0].lower().strip()
+                # If the part before the colon looks like a category, use only the part after.
+                if any(kw in category_candidate for kw in self._NON_SKILL_KEYWORDS) and len(category_candidate.split()) <= 3:
+                    text = parts[1]
+            
+            processed_lines.append(text.strip())
 
-            # If line has SEPARATOR tokens, split on them
-            if line.has_type("SEPARATOR"):
-                skills.extend(self._split_on_separators(line))
-            else:
-                # Whole line is one skill (e.g. "Machine Learning")
-                skill = line.raw.strip(self._STRIP_CHARS)
-                if skill:
-                    skills.append(skill)
+        full_text = ", ".join(filter(None, processed_lines))
+        potential_skills = re.split(r'\s*[,|;/]\s*|\s+[•·▪▸]\s+', full_text)
 
-        # Deduplicate while preserving order
         seen: Set[str] = set()
         result: List[str] = []
-        for s in skills:
-            key = s.lower()
-            if key not in seen:
+        for s in potential_skills:
+            s_clean = s.strip(self._STRIP_CHARS)
+            key = s_clean.lower()
+            if key and key not in seen and key not in self._NON_SKILL_KEYWORDS:
                 seen.add(key)
-                result.append(s)
+                result.append(s_clean)
         return result
-
-    def _split_on_separators(self, line: Line) -> List[str]:
-        """
-        Group tokens between SEPARATOR tokens into skill strings.
-        Consecutive WORDs form a single multi-word skill.
-        """
-        skills, current_words = [], []
-        for token in line.tokens:
-            if token.type == "SEPARATOR":
-                if current_words:
-                    skills.append(" ".join(current_words))
-                    current_words = []
-            else:
-                val = token.value.strip(self._STRIP_CHARS)
-                if val:
-                    current_words.append(val)
-        if current_words:
-            skills.append(" ".join(current_words))
-        return [s for s in skills if s]
 
 class HeaderBuilder:
     def __init__(self, context: ParseContext) -> None:
@@ -663,36 +775,72 @@ class HeaderBuilder:
 
     def _extract(self, lines: List[Line]) -> HeaderNode:
         node = HeaderNode()
+        name_candidates: List[Tuple[float, str, int]] = []  # (score, name, line_num)
 
         for line in lines:
             if line.is_blank():
                 continue
 
-            # Email — token-level (most reliable)
+            # Email, Phone, URL are strong signals, extract them first.
             if not node.email and line.has_type("EMAIL"):
                 node.email = self._first_of_type(line, "EMAIL")
-
-            # Phone — token-level
             if not node.phone and line.has_type("PHONE"):
                 node.phone = self._first_of_type(line, "PHONE")
-
-            # URL — token-level
             if line.has_type("URL"):
                 node.urls.append(self._first_of_type(line, "URL"))
 
-            # Name — heuristic: first non-blank line with only WORDs,
-            # 2-4 tokens, no special types already claimed above
-            if (
-                node.name is None
-                and line.all_word_types()
-                and 2 <= line.word_count() <= 5
-                and not line.has_type("EMAIL")
-                and not line.has_type("PHONE")
-                and not line.has_type("URL")
-            ):
-                node.name = line.raw.strip()
+            # Score every line in the header as a potential name
+            score = self._score_name_line(line)
+            if score > 0.4:  # Confidence threshold to gather candidates
+                name_candidates.append((score, line.raw.strip(), line.line_number))
+
+        # If we have candidates, pick the best one.
+        if name_candidates:
+            # Sort by score (desc) then by line number (asc) as a tie-breaker
+            name_candidates.sort(key=lambda x: (-x[0], x[2]))
+            best_name = name_candidates[0][1]
+
+            # Final sanity check: don't pick a name that is also the email/phone.
+            if best_name != node.email and best_name != node.phone:
+                node.name = best_name
 
         return node
+
+    def _score_name_line(self, line: Line) -> float:
+        """Scores a line on how likely it is to be a person's name."""
+        # Strong disqualifiers: if it contains these, it's definitely not a name.
+        if (line.has_type("EMAIL") or
+            line.has_type("PHONE") or
+            line.has_type("URL") or
+            any(t.type in DATE_TYPES for t in line.tokens) or
+            any(char.isdigit() for char in line.raw)):
+            return 0.0
+
+        text_lower = line.text_lower()
+        address_keywords = {"apt", "rd", "room", "st", "street", "road", "apartment", "pincode", "district", "city", "state"}
+        if any(kw in text_lower for kw in address_keywords):
+            return 0.0
+
+        meta_keywords = {"resume", "curriculum vitae", "bio-data", "profile"}
+        if any(kw in text_lower for kw in meta_keywords):
+            return 0.0
+
+        # A section header is not a name.
+        if self._is_section_header(line):
+            return 0.0
+
+        score = 0.0
+        # Positive signals that increase the score
+        if line.all_word_types(): score += 0.5
+        if 2 <= line.word_count() <= 4: score += 0.3  # Names are usually 2-4 words
+        if line.raw.istitle(): score += 0.3           # Names are usually in Title Case
+        if line.line_number <= 3: score += 0.2        # Names usually appear at the very top
+
+        # Negative signals (penalties) that decrease the score
+        if line.word_count() > 5: score -= 0.4
+        if any(p in line.raw for p in [',', ';', ':', '|', '(', ')']): score -= 0.7
+
+        return max(0.0, min(score, 1.0))
 
     @staticmethod
     def _first_of_type(line: Line, ttype: str) -> str:
@@ -716,23 +864,37 @@ class SectionBuilder:
         "work experience":            "experience",
         "employment history":         "experience",
         "career history":             "experience",
+        "relevant experience":        "experience",
+        "employment":                 "experience",
+        "research experience":        "experience",
         "academic background":        "education",
         "educational qualification":  "education",
         "educational qualifications": "education",
         "academic qualifications":    "education",
+        "academic details":           "education",
+        "education & credentials":    "education",
+        "academic profile":           "education",
         "technical skills":           "skills",
         "core competencies":          "skills",
         "key skills":                 "skills",
         "areas of expertise":         "skills",
         "professional skills":        "skills",
+        "computer skills":            "skills",
+        "technical expertise":        "skills",
+        "skill set":                  "skills",
         "projects":                   "projects",
         "personal projects":          "projects",
+        "academic projects":          "projects",
         "certifications":             "certifications",
         "certificates":               "certifications",
+        "licenses & certifications":  "certifications",
         "awards":                     "awards",
+        "awards and honors":          "awards",
+        "honors and awards":          "awards",
         "honours":                    "awards",
         "honors":                     "awards",
         "publications":               "publications",
+        "research papers":            "publications",
         "languages":                  "languages",
         "summary":                    "summary",
         "professional summary":       "summary",

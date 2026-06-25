@@ -15,52 +15,20 @@ from typing import Annotated, List
 from dotenv import load_dotenv
 from fastapi import FastAPI, File, Form, HTTPException, Query, UploadFile
 
-"""
-FastAPI application — Hybrid Resume Parser API.
-
-Endpoints:
-  GET  /                        health check
-  POST /parse-resume-hybrid     single file, hybrid or traditional-only
-  POST /parse-resume-batch      up to 10 files, concurrent
-  POST /match-job               resume file + job description → skill match
-"""
-
-import asyncio
-import os
-import tempfile
-from typing import Annotated, List
-from dotenv import load_dotenv
-from fastapi import FastAPI, File, Form, HTTPException, Query, UploadFile
-
 from utils.file_extractor import extract_text_from_pdf, extract_text_from_docx, extract_text_from_txt
 from llm_parser import LLMParser
 from lexer import Lexer
 from parser import ResumeParser
 from merger import merge, traditional_only, ParseResponse
 from job_matcher import match_job, JobMatchResult
-from merger import merge, traditional_only, ParseResponse
-from job_matcher import match_job, JobMatchResult
 
 load_dotenv()
 
-#LLM parser 
-#LLM parser 
 llm_parser = LLMParser(
     api_key=os.getenv("GROQ_API_KEY"),
     model=os.getenv("LLM_MODEL", "llama-3.1-8b-instant"),
-    model=os.getenv("LLM_MODEL", "llama-3.1-8b-instant"),
 )
 
-#FastAPI app 
-app = FastAPI(
-    title="Hybrid Resume Parser",
-    description=(
-        "Combines traditional lexer/parser/AST with LLM-assisted extraction. "
-        "Supports single-file hybrid parsing, batch processing, and job-description matching."
-    ),
-    version="1.0.0",
-)
-#FastAPI app 
 app = FastAPI(
     title="Hybrid Resume Parser",
     description=(
@@ -79,14 +47,6 @@ MAX_BATCH_SIZE = 10
 
 def _validate_upload(file: UploadFile) -> str:
     """Return the lowercased extension or raise HTTPException."""
-MAX_FILE_SIZE  = int(os.getenv("MAX_FILE_SIZE", 10_000_000))   # 10 MB
-MAX_BATCH_SIZE = 10
-
-
-#Shared helpers       
-
-def _validate_upload(file: UploadFile) -> str:
-    """Return the lowercased extension or raise HTTPException."""
     ext = os.path.splitext(file.filename or "")[-1].lower()
     if ext not in SUPPORTED_EXTENSIONS:
         raise HTTPException(status_code=400, detail=f"Unsupported file format: {ext}")
@@ -94,11 +54,7 @@ def _validate_upload(file: UploadFile) -> str:
         raise HTTPException(status_code=400, detail="File size exceeds 10MB limit")
     return ext
 
-    return ext
 
-
-async def _extract_text(file: UploadFile, ext: str) -> str:
-    """Read upload → temp file → plain text."""
 async def _extract_text(file: UploadFile, ext: str) -> str:
     """Read upload → temp file → plain text."""
     await file.seek(0)
@@ -112,11 +68,7 @@ async def _extract_text(file: UploadFile, ext: str) -> str:
 
         if ext == ".pdf":
             return extract_text_from_pdf(tmp_path)
-            return extract_text_from_pdf(tmp_path)
         elif ext == ".docx":
-            return extract_text_from_docx(tmp_path)
-        else:
-            return extract_text_from_txt(tmp_path)
             return extract_text_from_docx(tmp_path)
         else:
             return extract_text_from_txt(tmp_path)
@@ -129,14 +81,8 @@ async def _extract_text(file: UploadFile, ext: str) -> str:
 
 def _parse_text(text: str, use_llm: bool) -> ParseResponse:
     """Run traditional (+ optionally LLM) parser and merge results."""
-
-def _parse_text(text: str, use_llm: bool) -> ParseResponse:
-    """Run traditional (+ optionally LLM) parser and merge results."""
     if not text.strip():
         raise HTTPException(status_code=400, detail="File appears to be empty or unreadable.")
-
-    tokens     = Lexer().tokenize(text)
-    trad_result = ResumeParser().build(tokens=tokens)
 
     tokens     = Lexer().tokenize(text)
     trad_result = ResumeParser().build(tokens=tokens)
@@ -144,10 +90,8 @@ def _parse_text(text: str, use_llm: bool) -> ParseResponse:
     if use_llm:
         try:
             llm_result = llm_parser.parse_with_llm(text)
-            llm_result = llm_parser.parse_with_llm(text)
         except Exception as e:
             raise HTTPException(status_code=500, detail=f"LLM parsing failed: {e}")
-        return merge(trad_result, llm_result)
         return merge(trad_result, llm_result)
     else:
         return traditional_only(trad_result)

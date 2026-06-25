@@ -15,6 +15,7 @@ from __future__ import annotations
 import re
 from typing import List, Set, Optional
 from pydantic import BaseModel
+from utils.words import _SYNONYMS, _STOP,_MULTI_WORD_SKILLS
 
 
 #Response model 
@@ -33,109 +34,19 @@ class JobMatchResult(BaseModel):
 # Maps normalised lowercase variant → canonical form.
 # Both sides are added so matching works either way.
 
-_SYNONYMS: dict[str, str] = {
-    # Languages
-    "js":                    "javascript",
-    "ts":                    "typescript",
-    "py":                    "python",
-    "rb":                    "ruby",
-    "golang":                "go",
-    # Cloud
-    "aws":                   "amazon web services",
-    "amazon web services":   "aws",
-    "gcp":                   "google cloud platform",
-    "google cloud":          "google cloud platform",
-    "azure":                 "microsoft azure",
-    # ML / AI
-    "ml":                    "machine learning",
-    "dl":                    "deep learning",
-    "ai":                    "artificial intelligence",
-    "nlp":                   "natural language processing",
-    "cv":                    "computer vision",
-    "gen ai":                "generative ai",
-    "llm":                   "large language model",
-    # DevOps
-    "k8s":                   "kubernetes",
-    "ci/cd":                 "continuous integration",
-    "ci cd":                 "continuous integration",
-    # Frameworks / libs
-    "react":                 "reactjs",
-    "react.js":              "reactjs",
-    "react js":              "reactjs",
-    "vue":                   "vuejs",
-    "vue.js":                "vuejs",
-    "node":                  "nodejs",
-    "node.js":               "nodejs",
-    "next":                  "nextjs",
-    "next.js":               "nextjs",
-    "express":               "expressjs",
-    "express.js":            "expressjs",
-    "fast api":              "fastapi",
-    "spring":                "spring boot",
-    # Databases
-    "postgres":              "postgresql",
-    "mongo":                 "mongodb",
-    "es":                    "elasticsearch",
-    # Practices
-    "oop":                   "object oriented programming",
-    "tdd":                   "test driven development",
-    "bdd":                   "behavior driven development",
-    "rest":                  "rest api",
-    "restful":               "rest api",
-    "graphql":               "graphql api",
-    # Misc
-    "dot net":               ".net",
-    "dotnet":                ".net",
-    "asp.net":               ".net",
-    "tf":                    "tensorflow",
-    "pt":                    "pytorch",
-}
-
-
 def _normalise(skill: str) -> str:
     """Lowercase, strip punctuation noise, apply synonym map."""
-    s = skill.lower().strip(" .,;:-")
-    return _SYNONYMS.get(s, s)
+    # Remove content in parentheses, e.g., "ETL (Extract, Transform, Load)" -> "ETL"
+    s = re.sub(r'\s*\([^)]*\)', '', skill).strip()
+    s_lower = s.lower().strip(" .,;:-")
+    return _SYNONYMS.get(s_lower, s_lower)
 
 
 def _normalise_set(skills: List[str]) -> Set[str]:
-    "handle multiple string"
-    result = set()
-    for s in skills:
-        n = _normalise(s)
-        result.add(n)
-        # Also add synonym expansions so matching works both directions
-        if n in _SYNONYMS:
-            result.add(_SYNONYMS[n])
-    return result
+    """Normalises a list of skills to a set of canonical forms."""
+    return {_normalise(s) for s in skills if s and s.strip()}
 
 
-#Keyword extraction fallback 
-
-_STOP = {
-    "the","and","or","a","an","in","on","at","to","for","of","with",
-    "is","are","be","we","you","your","our","will","must","should","can",
-    "have","has","this","that","as","from","by","not","but","if","it",
-    "its","etc","including","such","other","any","all","both","each",
-    "more","also","than","then","when","where","how","what","who","which",
-    "about","into","through","during","before","after","above","below",
-    "between","up","down","out","off","over","under","again","further",
-    "once","experience","working","work","ability","strong","knowledge",
-    "using","use","used","good","excellent","required","preferred",
-    "minimum","years","year","plus","role","team","company","position",
-    "candidate","responsibilities","qualifications","requirement",
-}
-
-_MULTI_WORD_SKILLS = [
-    "machine learning","deep learning","natural language processing",
-    "computer vision","data science","data engineering","cloud computing",
-    "distributed systems","continuous integration","continuous deployment",
-    "test driven development","behavior driven development",
-    "object oriented programming","functional programming",
-    "restful api","rest api","graphql api","google cloud platform",
-    "amazon web services","microsoft azure",
-    "spring boot","node js","next js","react js","vue js",
-]
 
 
 def _extract_keywords(text: str) -> Set[str]:
@@ -148,8 +59,10 @@ def _extract_keywords(text: str) -> Set[str]:
             text_lower = text_lower.replace(phrase, " ")
 
     for tok in re.findall(r"[a-z][a-z0-9#\+\.\-\/]*", text_lower):
-        if len(tok) >= 2 and tok not in _STOP:
-            found.add(tok)
+        # Post-process token to remove trailing punctuation that the regex might include
+        cleaned_tok = tok.strip(".,;")
+        if len(cleaned_tok) >= 2 and cleaned_tok not in _STOP:
+            found.add(cleaned_tok)
 
     return found
 
@@ -217,13 +130,16 @@ def match_job(
     """
     if jd_skills_llm is not None:
         #LLM path
-        resume_norm = _normalise_set(resume_skills)
+        # The resume_skills from the parser are often incomplete.
+        # Use the keyword extractor on the full resume text for a more comprehensive skill set.
+        resume_kw = _extract_keywords(" ".join(resume_skills) + " " + resume_text)
+        resume_norm = _normalise_set(list(resume_kw))
         jd_norm     = _normalise_set(jd_skills_llm)
         return _compute_match(
             resume_norm=resume_norm,
             jd_norm=jd_norm,
             jd_display=jd_skills_llm,
-            resume_display=resume_skills,
+            resume_display=sorted(resume_kw),
             method="llm",
         )
     else:

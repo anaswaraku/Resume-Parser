@@ -50,6 +50,7 @@ class Lexer:
         ('DATE',       re.compile(_DATE)),
         # Standalone year
         ('YEAR',       re.compile(fr'\b{_YEAR}\b')),
+        ('DATE_PRESENT',re.compile(fr'(?i)\b{_PRESENT}\b') ),
         #Structure
         ('NEWLINE',  re.compile( r'\n')),
         ('SEPARATOR', re.compile(r'[|•·,;/\\]')),

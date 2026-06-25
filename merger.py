@@ -103,8 +103,9 @@ def _merge_education(trad: List[Education], llm: List[Education]) -> List[Educat
     don't fuzzy-match any LLM entry (by school name word overlap)."""
     result = list(llm)
     for t in trad:
+        t_text = f"{t.degree or ''} {t.school or ''}"
         is_dup = any(
-            _word_overlap(t.school or "", l.school or "") >= _OVERLAP_THRESHOLD
+            _word_overlap(t_text, f"{l.degree or ''} {l.school or ''}") >= _OVERLAP_THRESHOLD
             for l in llm
         )
         if not is_dup:
