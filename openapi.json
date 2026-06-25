@@ -1,0 +1,631 @@
+{
+    "openapi": "3.1.0",
+    "info": {
+        "title": "Hybrid Resume Parser",
+        "description": "Combines traditional lexer/parser/AST with LLM-assisted extraction. Supports single-file hybrid parsing, batch processing, and job-description matching.",
+        "version": "1.0.0"
+    },
+    "paths": {
+        "/": {
+            "get": {
+                "summary": "Health check",
+                "operationId": "home__get",
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/parse-resume-hybrid": {
+            "post": {
+                "summary": "Parse a single resume (hybrid or traditional-only)",
+                "operationId": "parse_resume_hybrid_parse_resume_hybrid_post",
+                "parameters": [
+                    {
+                        "name": "use_llm",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "boolean",
+                            "description": "Enable LLM-assisted parsing",
+                            "default": true,
+                            "title": "Use Llm"
+                        },
+                        "description": "Enable LLM-assisted parsing"
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Body_parse_resume_hybrid_parse_resume_hybrid_post"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ParseResponse"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/match-job": {
+            "post": {
+                "summary": "Match a resume against a job description",
+                "operationId": "match_job_endpoint_match_job_post",
+                "parameters": [
+                    {
+                        "name": "use_llm",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "boolean",
+                            "description": "Use LLM to extract resume skills and JD skills",
+                            "default": true,
+                            "title": "Use Llm"
+                        },
+                        "description": "Use LLM to extract resume skills and JD skills"
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Body_match_job_endpoint_match_job_post"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/JobMatchResult"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/find-match": {
+            "post": {
+                "summary": "Find best matching resume from a batch for a job description",
+                "operationId": "find_match_find_match_post",
+                "parameters": [
+                    {
+                        "name": "use_llm",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "boolean",
+                            "description": "Use LLM to extract resume skills and JD skills",
+                            "default": true,
+                            "title": "Use Llm"
+                        },
+                        "description": "Use LLM to extract resume skills and JD skills"
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Body_find_match_find_match_post"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/BestMatchResult"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "BestMatchResult": {
+                "properties": {
+                    "filename": {
+                        "type": "string",
+                        "title": "Filename"
+                    },
+                    "match": {
+                        "$ref": "#/components/schemas/JobMatchResult"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "filename",
+                    "match"
+                ],
+                "title": "BestMatchResult"
+            },
+            "Body_find_match_find_match_post": {
+                "properties": {
+                    "files": {
+                        "items": {
+                            "type": "string",
+                            "contentMediaType": "application/octet-stream"
+                        },
+                        "type": "array",
+                        "title": "Files",
+                        "description": "Up to 10 resume files (PDF / DOCX / TXT / RTF)"
+                    },
+                    "job_description": {
+                        "type": "string",
+                        "title": "Job Description",
+                        "description": "Job description text"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "files",
+                    "job_description"
+                ],
+                "title": "Body_find_match_find_match_post"
+            },
+            "Body_match_job_endpoint_match_job_post": {
+                "properties": {
+                    "file": {
+                        "type": "string",
+                        "contentMediaType": "application/octet-stream",
+                        "title": "File",
+                        "description": "Resume file (PDF / DOCX / TXT / RTF)"
+                    },
+                    "job_description": {
+                        "type": "string",
+                        "title": "Job Description",
+                        "description": "Job description text"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "file",
+                    "job_description"
+                ],
+                "title": "Body_match_job_endpoint_match_job_post"
+            },
+            "Body_parse_resume_hybrid_parse_resume_hybrid_post": {
+                "properties": {
+                    "file": {
+                        "type": "string",
+                        "contentMediaType": "application/octet-stream",
+                        "title": "File"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "file"
+                ],
+                "title": "Body_parse_resume_hybrid_parse_resume_hybrid_post"
+            },
+            "ConfidenceScore": {
+                "properties": {
+                    "name_from_llm": {
+                        "type": "boolean",
+                        "title": "Name From Llm",
+                        "default": false
+                    },
+                    "email_from_llm": {
+                        "type": "boolean",
+                        "title": "Email From Llm",
+                        "default": false
+                    },
+                    "phone_from_llm": {
+                        "type": "boolean",
+                        "title": "Phone From Llm",
+                        "default": false
+                    },
+                    "education_added_by_llm": {
+                        "type": "integer",
+                        "title": "Education Added By Llm",
+                        "default": 0
+                    },
+                    "experience_added_by_llm": {
+                        "type": "integer",
+                        "title": "Experience Added By Llm",
+                        "default": 0
+                    },
+                    "skills_added_by_llm": {
+                        "type": "integer",
+                        "title": "Skills Added By Llm",
+                        "default": 0
+                    },
+                    "improvement_pct": {
+                        "type": "number",
+                        "title": "Improvement Pct",
+                        "default": 0.0
+                    }
+                },
+                "type": "object",
+                "title": "ConfidenceScore",
+                "description": "Per-field flags showing which fields the LLM contributed."
+            },
+            "Education": {
+                "properties": {
+                    "degree": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Degree"
+                    },
+                    "school": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "School"
+                    },
+                    "start_date": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Start Date"
+                    },
+                    "end_date": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "End Date"
+                    },
+                    "description": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Description"
+                    }
+                },
+                "type": "object",
+                "title": "Education"
+            },
+            "Experience": {
+                "properties": {
+                    "company": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Company"
+                    },
+                    "role": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Role"
+                    },
+                    "start_date": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Start Date"
+                    },
+                    "end_date": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "End Date"
+                    },
+                    "description": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Description"
+                    }
+                },
+                "type": "object",
+                "title": "Experience"
+            },
+            "HTTPValidationError": {
+                "properties": {
+                    "detail": {
+                        "items": {
+                            "$ref": "#/components/schemas/ValidationError"
+                        },
+                        "type": "array",
+                        "title": "Detail"
+                    }
+                },
+                "type": "object",
+                "title": "HTTPValidationError"
+            },
+            "JobMatchResult": {
+                "properties": {
+                    "matched_skills": {
+                        "items": {
+                            "type": "string"
+                        },
+                        "type": "array",
+                        "title": "Matched Skills"
+                    },
+                    "missing_skills": {
+                        "items": {
+                            "type": "string"
+                        },
+                        "type": "array",
+                        "title": "Missing Skills"
+                    },
+                    "extra_skills": {
+                        "items": {
+                            "type": "string"
+                        },
+                        "type": "array",
+                        "title": "Extra Skills"
+                    },
+                    "score": {
+                        "type": "number",
+                        "title": "Score"
+                    },
+                    "score_pct": {
+                        "type": "number",
+                        "title": "Score Pct"
+                    },
+                    "extraction_method": {
+                        "type": "string",
+                        "title": "Extraction Method"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "matched_skills",
+                    "missing_skills",
+                    "extra_skills",
+                    "score",
+                    "score_pct",
+                    "extraction_method"
+                ],
+                "title": "JobMatchResult",
+                "description": "Final Output"
+            },
+            "MergedResult": {
+                "properties": {
+                    "name": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Name"
+                    },
+                    "email": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Email"
+                    },
+                    "phone": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Phone"
+                    },
+                    "education": {
+                        "items": {
+                            "$ref": "#/components/schemas/Education"
+                        },
+                        "type": "array",
+                        "title": "Education",
+                        "default": []
+                    },
+                    "experience": {
+                        "items": {
+                            "$ref": "#/components/schemas/Experience"
+                        },
+                        "type": "array",
+                        "title": "Experience",
+                        "default": []
+                    },
+                    "skills": {
+                        "items": {
+                            "type": "string"
+                        },
+                        "type": "array",
+                        "title": "Skills",
+                        "default": []
+                    }
+                },
+                "type": "object",
+                "title": "MergedResult"
+            },
+            "ParseResponse": {
+                "properties": {
+                    "traditional_parser": {
+                        "$ref": "#/components/schemas/MergedResult"
+                    },
+                    "llm_parser": {
+                        "anyOf": [
+                            {
+                                "$ref": "#/components/schemas/MergedResult"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ]
+                    },
+                    "merged_result": {
+                        "$ref": "#/components/schemas/MergedResult"
+                    },
+                    "parsing_method": {
+                        "type": "string",
+                        "title": "Parsing Method"
+                    },
+                    "confidence": {
+                        "anyOf": [
+                            {
+                                "$ref": "#/components/schemas/ConfidenceScore"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ]
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "traditional_parser",
+                    "merged_result",
+                    "parsing_method"
+                ],
+                "title": "ParseResponse"
+            },
+            "ValidationError": {
+                "properties": {
+                    "loc": {
+                        "items": {
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "integer"
+                                }
+                            ]
+                        },
+                        "type": "array",
+                        "title": "Location"
+                    },
+                    "msg": {
+                        "type": "string",
+                        "title": "Message"
+                    },
+                    "type": {
+                        "type": "string",
+                        "title": "Error Type"
+                    },
+                    "input": {
+                        "title": "Input"
+                    },
+                    "ctx": {
+                        "type": "object",
+                        "title": "Context"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "loc",
+                    "msg",
+                    "type"
+                ],
+                "title": "ValidationError"
+            }
+        }
+    }
+}
