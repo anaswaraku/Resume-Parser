@@ -2,6 +2,19 @@ import re
 from dataclasses import dataclass
 from typing import List, Tuple
 
+
+_MONTH = r'(?:January|February|March|April|May|June|July|August|September|October|November|December|Jan|Feb|Mar|Apr|Jun|Jul|Aug|Sep|Oct|Nov|Dec|0?[1-9]|1[0-2])'
+_YEAR = r'(?:19|20)\d{2}'
+_SEP = r'[\s\-/\.,]+'
+_RANGE_SEP = r'[\s\-–—to]+'
+_PRESENT = r'(?:present|current|now)'
+
+# (?i) makes them case-insensitive so "may", "MAY", "May" all match.
+_DATE = fr'(?i)\b{_MONTH}\.?{_SEP}{_YEAR}\b'
+_DATE_DMY = fr'(?i)\b\d{{1,2}}{_SEP}{_MONTH}\.?{_SEP}{_YEAR}\b'
+_DATE_RANGE = fr'(?i)\b{_MONTH}\.?{_SEP}{_YEAR}{_RANGE_SEP}(?:{_MONTH}\.?{_SEP}{_YEAR}|{_PRESENT})\b'
+_YEAR_RANGE = fr'(?i)\b{_YEAR}{_RANGE_SEP}(?:{_YEAR}|\d{{2}}|{_PRESENT})\b'
+
 #automatically creates constructors and utility methods
 @dataclass
 class Token:
@@ -31,36 +44,12 @@ class Lexer:
          r'|linkedin\.com/in/[^\s]+'
          r'|github\.com/[^\s]+')),
         #Dates — most specific first 
-        # Range with full month names: "January 2020 - March 2024" or "Jan 2020 – Present"
-        ('DATE_RANGE',
-         re.compile(r'\b(?:January|February|March|April|May|June|July|August|September|'
-         r'October|November|December|'
-         r'Jan|Feb|Mar|Apr|Jun|Jul|Aug|Sep|Oct|Nov|Dec)'
-         r'\.?\s+\d{4}'
-         r'\s*[-–—to]+\s*'
-         r'(?:January|February|March|April|May|June|July|August|September|'
-         r'October|November|December|'
-         r'Jan|Feb|Mar|Apr|Jun|Jul|Aug|Sep|Oct|Nov|Dec'
-         r'\.?\s+\d{4}|[Pp]resent|[Cc]urrent|[Nn]ow)')),
-        # Year range: "2021 – 2024" or "2021 - Present"
-        ('YEAR_RANGE',
-         re.compile(r'\b(?:19|20)\d{2}\s*[-–—to]+\s*(?:(?:19|20)\d{2}|\d{2}|[Pp]resent|[Cc]urrent)\b')),
-        # Single month+year: "Jun 2020" or "June 2020"
-        ('DATE',
-         re.compile(r'\b(?:January|February|March|April|May|June|July|August|September|'
-         r'October|November|December|'
-         r'Jan|Feb|Mar|Apr|Jun|Jul|Aug|Sep|Oct|Nov|Dec)'
-         r'\.?\s+\d{4}\b')),
-        # Day Month Year: "22 June 2026" or "15 March 2000"
-        ('DATE_DMY',
-         re.compile(r'\b\d{1,2}\s+'
-         r'(?:January|February|March|April|May|June|July|August|September|'
-         r'October|November|December|'
-         r'Jan|Feb|Mar|Apr|Jun|Jul|Aug|Sep|Oct|Nov|Dec)'
-         r'\s+\d{4}\b')),
+        ('DATE_RANGE', re.compile(_DATE_RANGE)),
+        ('YEAR_RANGE', re.compile(_YEAR_RANGE)),
+        ('DATE_DMY',   re.compile(_DATE_DMY)),
+        ('DATE',       re.compile(_DATE)),
         # Standalone year
-        ('YEAR',
-         re.compile(r'\b(19|20)\d{2}\b')),
+        ('YEAR',       re.compile(fr'\b{_YEAR}\b')),
         #Structure
         ('NEWLINE',  re.compile( r'\n')),
         ('SEPARATOR', re.compile(r'[|•·,;/\\]')),

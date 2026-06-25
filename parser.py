@@ -22,7 +22,11 @@ from lexer import Token
 from dataclasses import dataclass
 from collections import defaultdict
 from ast_models import Education, Experience,ResumeAST
+<<<<<<< HEAD
 
+=======
+from dateutil import parser as date_parser
+>>>>>>> 8496b66 (modified parser)
 from dataclasses import dataclass, field
 from typing import List
 
@@ -128,13 +132,23 @@ class Line:
         
     def extract_dates(self) -> List[str]:
         """Extract individual dates from all date-like tokens."""
+
+        def normalize_date(d_str:str)->str:
+            d_lower = d_str.strip().lower()
+            if d_lower in ("present","current","now"):
+                return "Present"
+            try:
+                dt = date_parser.parse(d_str)
+                return dt.strftime("%Y-%m")
+            except (ValueError,TypeError,OverflowError):
+                return d_str.strip()
         dates = []
         for t in self.tokens:
             if t.type in {"DATE_RANGE", "YEAR_RANGE"}:
                 parts = re.split(r'\s*[-–—to]+\s*', t.value, maxsplit=1)
-                dates.extend([p.strip() for p in parts if p.strip()])
+                dates.extend([normalize_date(p) for p in parts if p.strip()])
             elif t.type in DATE_TYPES:
-                dates.append(t.value.strip())
+                dates.append(normalize_date(t.value))
         return dates
 
     def token_types(self) -> List[str]:  

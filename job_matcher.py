@@ -17,9 +17,10 @@ from typing import List, Set, Optional
 from pydantic import BaseModel
 
 
-#Response model ────────────────────────────────────────────────────────────
+#Response model 
 
 class JobMatchResult(BaseModel):
+    """Final Output"""
     matched_skills: List[str]
     missing_skills: List[str]
     extra_skills:   List[str]       # on resume but not required by JD
@@ -28,7 +29,7 @@ class JobMatchResult(BaseModel):
     extraction_method: str          # "llm" | "keyword"
 
 
-#Synonym / abbreviation map ────────────────────────────────────────────────
+#Synonym / abbreviation map 
 # Maps normalised lowercase variant → canonical form.
 # Both sides are added so matching works either way.
 
@@ -98,6 +99,7 @@ def _normalise(skill: str) -> str:
 
 
 def _normalise_set(skills: List[str]) -> Set[str]:
+    "handle multiple string"
     result = set()
     for s in skills:
         n = _normalise(s)
@@ -108,7 +110,7 @@ def _normalise_set(skills: List[str]) -> Set[str]:
     return result
 
 
-#Keyword extraction fallback ───────────────────────────────────────────────
+#Keyword extraction fallback 
 
 _STOP = {
     "the","and","or","a","an","in","on","at","to","for","of","with",
@@ -152,7 +154,7 @@ def _extract_keywords(text: str) -> Set[str]:
     return found
 
 
-#Core matching logic ───────────────────────────────────────────────────────
+#matching logic
 
 def _compute_match(
     resume_norm: Set[str],
@@ -195,7 +197,7 @@ def _compute_match(
     )
 
 
-#Public API ────────────────────────────────────────────────────────────────
+#Public API
 
 def match_job(
     resume_skills: List[str],
@@ -214,7 +216,7 @@ def match_job(
       - Extract keywords from raw JD text and raw resume text.
     """
     if jd_skills_llm is not None:
-        #LLM path ─────────────────────────────────────────────────────────
+        #LLM path
         resume_norm = _normalise_set(resume_skills)
         jd_norm     = _normalise_set(jd_skills_llm)
         return _compute_match(
@@ -225,7 +227,7 @@ def match_job(
             method="llm",
         )
     else:
-        #Keyword fallback ─────────────────────────────────────────────────
+        #Keyword fallback 
         resume_kw = _extract_keywords(" ".join(resume_skills) + " " + resume_text)
         jd_kw     = _extract_keywords(jd_text)
         resume_norm = {_normalise(k) for k in resume_kw}
