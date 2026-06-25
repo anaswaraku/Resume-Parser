@@ -22,11 +22,7 @@ from lexer import Token
 from dataclasses import dataclass
 from collections import defaultdict
 from ast_models import Education, Experience,ResumeAST
-<<<<<<< HEAD
-
-=======
 from dateutil import parser as date_parser
->>>>>>> 8496b66 (modified parser)
 from dataclasses import dataclass, field
 from typing import List
 
