@@ -1,46 +1,64 @@
-from fastapi import FastAPI, File, UploadFile, HTTPException, Query
+"""
+FastAPI application — Hybrid Resume Parser API.
+
+Endpoints:
+  GET  /                        health check
+  POST /parse-resume-hybrid     single file, hybrid or traditional-only
+  POST /parse-resume-batch      up to 10 files, concurrent
+  POST /match-job               resume file + job description → skill match
+"""
+
+import asyncio
+import os
+import tempfile
+from typing import Annotated, List
+from dotenv import load_dotenv
+from fastapi import FastAPI, File, Form, HTTPException, Query, UploadFile
+
 from utils.file_extractor import extract_text_from_pdf, extract_text_from_docx, extract_text_from_txt
 from llm_parser import LLMParser
 from lexer import Lexer
 from parser import ResumeParser
-
-import os
-import tempfile
-from dotenv import load_dotenv
+from merger import merge, traditional_only, ParseResponse
+from job_matcher import match_job, JobMatchResult
 
 load_dotenv()
 
+#LLM parser 
 llm_parser = LLMParser(
     api_key=os.getenv("GROQ_API_KEY"),
-    model=os.getenv("LLM_MODEL", "llama3-8b-8192")
+    model=os.getenv("LLM_MODEL", "llama-3.1-8b-instant"),
 )
 
-app = FastAPI()
+#FastAPI app 
+app = FastAPI(
+    title="Hybrid Resume Parser",
+    description=(
+        "Combines traditional lexer/parser/AST with LLM-assisted extraction. "
+        "Supports single-file hybrid parsing, batch processing, and job-description matching."
+    ),
+    version="1.0.0",
+)
 
 SUPPORTED_EXTENSIONS = {".pdf", ".docx", ".txt", ".rtf"}
-MAX_FILE_SIZE = int(os.getenv("MAX_FILE_SIZE", 10_000_000))
+MAX_FILE_SIZE  = int(os.getenv("MAX_FILE_SIZE", 10_000_000))   # 10 MB
+MAX_BATCH_SIZE = 10
 
 
-@app.get("/")
-def home():
-    return {"status": "ok"}
+#Shared helpers       
 
-
-@app.post("/parse-resume-hybrid")
-async def parse_resume_hybrid(
-    file: UploadFile = File(...),
-    use_llm: bool = Query(default=True)
-):
-    # Validate extension
+def _validate_upload(file: UploadFile) -> str:
+    """Return the lowercased extension or raise HTTPException."""
     ext = os.path.splitext(file.filename or "")[-1].lower()
     if ext not in SUPPORTED_EXTENSIONS:
         raise HTTPException(status_code=400, detail=f"Unsupported file format: {ext}")
-
-    # Validate size
     if file.size is not None and file.size > MAX_FILE_SIZE:
         raise HTTPException(status_code=400, detail="File size exceeds 10MB limit")
+    return ext
 
-    # Read file bytes and write to temp file (extractors need a filepath)
+
+async def _extract_text(file: UploadFile, ext: str) -> str:
+    """Read upload → temp file → plain text."""
     await file.seek(0)
     contents = await file.read()
 
@@ -50,30 +68,115 @@ async def parse_resume_hybrid(
             tmp.write(contents)
             tmp_path = tmp.name
 
-        # Extract plain text based on file type
         if ext == ".pdf":
-            text = extract_text_from_pdf(tmp_path)
+            return extract_text_from_pdf(tmp_path)
         elif ext == ".docx":
-            text = extract_text_from_docx(tmp_path)
-        else:  # .txt or .rtf
-            text = extract_text_from_txt(tmp_path)
-
+            return extract_text_from_docx(tmp_path)
+        else:
+            return extract_text_from_txt(tmp_path)
     except RuntimeError as e:
         raise HTTPException(status_code=500, detail=f"Failed to extract text: {e}")
     finally:
         if tmp_path and os.path.exists(tmp_path):
             os.unlink(tmp_path)
 
+
+def _parse_text(text: str, use_llm: bool) -> ParseResponse:
+    """Run traditional (+ optionally LLM) parser and merge results."""
     if not text.strip():
         raise HTTPException(status_code=400, detail="File appears to be empty or unreadable.")
 
-    # Route to LLM or traditional parser
+    tokens     = Lexer().tokenize(text)
+    trad_result = ResumeParser().build(tokens=tokens)
+
     if use_llm:
         try:
-            return llm_parser.parse_with_llm(text)
+            llm_result = llm_parser.parse_with_llm(text)
         except Exception as e:
             raise HTTPException(status_code=500, detail=f"LLM parsing failed: {e}")
+        return merge(trad_result, llm_result)
     else:
-        tokens = Lexer().tokenize(text)
-        sections = ResumeParser().build(tokens=tokens)
-        return sections
+        return traditional_only(trad_result)
+
+
+#Endpoints
+
+@app.get("/", summary="Health check")
+def home():
+    return {"status": "ok"}
+
+
+@app.post(
+    "/parse-resume-hybrid",
+    response_model=ParseResponse,
+    summary="Parse a single resume (hybrid or traditional-only)",
+)
+async def parse_resume_hybrid(
+    file: UploadFile = File(...),
+    use_llm: bool = Query(default=True, description="Enable LLM-assisted parsing"),
+):
+    ext  = _validate_upload(file)
+    text = await _extract_text(file, ext)
+    return _parse_text(text, use_llm)
+
+
+@app.post(
+    "/parse-resume-batch",
+    summary="Parse up to 10 resumes concurrently",
+)
+async def parse_resume_batch(
+    files: Annotated[List[UploadFile], File(description="Resume files (up to 10)")],
+    use_llm: bool = Query(default=True, description="Enable LLM-assisted parsing"),
+):
+    if len(files) > MAX_BATCH_SIZE:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Batch limit is {MAX_BATCH_SIZE} files. Received {len(files)}.",
+        )
+
+    async def _process_one(file: UploadFile) -> dict:
+        try:
+            ext    = _validate_upload(file)
+            text   = await _extract_text(file, ext)
+            result = _parse_text(text, use_llm)
+            return {"filename": file.filename, "status": "ok", "result": result.model_dump()}
+        except HTTPException as e:
+            return {"filename": file.filename, "status": "error", "detail": e.detail}
+        except Exception as e:
+            return {"filename": file.filename, "status": "error", "detail": str(e)}
+
+    results = await asyncio.gather(*[_process_one(f) for f in files])
+    return {"total": len(files), "results": list(results)}
+
+
+@app.post(
+    "/match-job",
+    response_model=JobMatchResult,
+    summary="Match a resume against a job description",
+)
+async def match_job_endpoint(
+    file: Annotated[UploadFile, File(description="Resume file (PDF / DOCX / TXT / RTF)")],
+    job_description: Annotated[str, Form(description="Job description text")],
+    use_llm: bool = Query(default=True, description="Use LLM to extract resume skills and JD skills"),
+):
+    ext  = _validate_upload(file)
+    text = await _extract_text(file, ext)
+
+    # Parse resume (always runs traditional; LLM fills gaps when use_llm=True)
+    parse_result  = _parse_text(text, use_llm)
+    resume_skills = parse_result.merged_result.skills
+
+    # Extract JD skills via LLM (much more accurate than keyword heuristics)
+    jd_skills_llm = None
+    if use_llm:
+        try:
+            jd_skills_llm = llm_parser.extract_jd_skills(job_description)
+        except Exception:
+            jd_skills_llm = None   # fall through to keyword mode silently
+
+    return match_job(
+        resume_skills=resume_skills,
+        resume_text=text,
+        jd_text=job_description,
+        jd_skills_llm=jd_skills_llm,
+    )

@@ -30,7 +30,7 @@ class Lexer:
         re.compile( r'https?://[^\s]+|www\.[^\s]+'
          r'|linkedin\.com/in/[^\s]+'
          r'|github\.com/[^\s]+')),
-        # ── Dates — most specific first ───────────────────────
+        #Dates — most specific first 
         # Range with full month names: "January 2020 - March 2024" or "Jan 2020 – Present"
         ('DATE_RANGE',
          re.compile(r'\b(?:January|February|March|April|May|June|July|August|September|'
@@ -61,11 +61,11 @@ class Lexer:
         # Standalone year
         ('YEAR',
          re.compile(r'\b(19|20)\d{2}\b')),
-        # ── Structure ─────────────────────────────────────────
+        #Structure
         ('NEWLINE',  re.compile( r'\n')),
         ('SEPARATOR', re.compile(r'[|•·,;/\\]')),
         ('SKIP',re.compile(r'[ \t\r]+')),     # horizontal whitespace — drop
-        # ── Catch-all — must be last ──────────────────────────
+        #Catch-all — must be last 
         ('WORD', re.compile(r"[A-Za-z0-9_.'\-]+")),]
 
     _SKIP = re.compile(r'[ \t\r]+')#white space-spaces,tabs - discard
