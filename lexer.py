@@ -44,7 +44,7 @@ class Lexer:
          r'\.?\s+\d{4}|[Pp]resent|[Cc]urrent|[Nn]ow)')),
         # Year range: "2021 – 2024" or "2021 - Present"
         ('YEAR_RANGE',
-         re.compile(r'\b(19|20)\d{2}\s*[-–—to]+\s*(?:(19|20)\d{2}|[Pp]resent|[Cc]urrent)\b')),
+         re.compile(r'\b(?:19|20)\d{2}\s*[-–—to]+\s*(?:(?:19|20)\d{2}|\d{2}|[Pp]resent|[Cc]urrent)\b')),
         # Single month+year: "Jun 2020" or "June 2020"
         ('DATE',
          re.compile(r'\b(?:January|February|March|April|May|June|July|August|September|'

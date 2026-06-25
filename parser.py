@@ -16,18 +16,17 @@ step3: Section("eduction")->EducationNode[]
 step4: ResumeNode -> ResumeAST 
 """
 from __future__ import annotations
+import re
 from typing import List,Optional,Tuple,Set,Dict
 from lexer import Token
 from dataclasses import dataclass
 from collections import defaultdict
 from ast_models import Education, Experience,ResumeAST
-@dataclass
-class Line:
-    type:str
-    value:List[str] 
 
 from dataclasses import dataclass, field
 from typing import List
+
+DATE_TYPES = {"DATE", "DATE_RANGE", "YEAR_RANGE", "DATE_DMY", "YEAR"}
 
 
 @dataclass
@@ -110,17 +109,6 @@ class ParseContext:
         }
     )
 
-
-@dataclass
-class Token:
-    type: str
-    value: str
-    position: int
-
-def __repr__(self) -> str:  
-    return f"Token({self.type}, {self.value!r})"
-
-
 @dataclass
 class Line:
     tokens: List[Token]
@@ -134,7 +122,21 @@ class Line:
     
     def has_type(self, ttype: str) -> bool:  
         return any(t.type == ttype for t in self.tokens)  
-    
+        
+    def has_date(self) -> bool:
+        return any(t.type in DATE_TYPES for t in self.tokens)
+        
+    def extract_dates(self) -> List[str]:
+        """Extract individual dates from all date-like tokens."""
+        dates = []
+        for t in self.tokens:
+            if t.type in {"DATE_RANGE", "YEAR_RANGE"}:
+                parts = re.split(r'\s*[-–—to]+\s*', t.value, maxsplit=1)
+                dates.extend([p.strip() for p in parts if p.strip()])
+            elif t.type in DATE_TYPES:
+                dates.append(t.value.strip())
+        return dates
+
     def token_types(self) -> List[str]:  
         return [t.type for t in self.tokens]  
     
@@ -331,9 +333,10 @@ class EducationParser:
 
             # Date range is the most unambiguous — assign first
             if dt >= 0.9:
-                dates = self._extract_dates(line)
-                node.start_date = ParsedField(dates[0], dt)
-                node.end_date   = ParsedField(dates[1] if len(dates) > 1 else None, dt)
+                dates = line.extract_dates()
+                if dates:
+                    node.start_date = ParsedField(dates[0], dt)
+                    node.end_date   = ParsedField(dates[1] if len(dates) > 1 else None, dt)
 
             # Degree vs school — only if date didn't win
             elif d >= s and d > 0.3 and node.degree.value is None:
@@ -367,7 +370,7 @@ class EducationParser:
             score += 0.8
         if line.word_count() <= 8:
             score += 0.1
-        if line.has_type("DATE"):           # dates don't belong in a degree line
+        if line.has_date():           # dates don't belong in a degree line
             score -= 0.6
         if line.has_type("EMAIL"):
             score -= 0.9
@@ -380,24 +383,21 @@ class EducationParser:
             score += 0.75
         if 2 <= line.word_count() <= 6:
             score += 0.1
-        if line.has_type("DATE"):
+        if line.has_date():
             score -= 0.5
         return max(0.0, min(score, 1.0))
 
     def _score_date_range(self, line: Line) -> float:
-        date_count = sum(1 for t in line.tokens if t.type == "DATE")
-        if date_count >= 2:
+        date_tokens = [t for t in line.tokens if t.type in DATE_TYPES]
+        if not date_tokens:
+            return 0.0
+        if any(t.type in {"DATE_RANGE", "YEAR_RANGE"} for t in date_tokens):
+            return 0.95
+        if len(date_tokens) >= 2:
             return 0.95     # "Sep 2018 – May 2022" — very high confidence
-        if date_count == 1:
+        if len(date_tokens) == 1:
             return 0.80     # single date or "Sep 2018 – Present"
         return 0.0
-
-    #date extraction ─────
-
-    @staticmethod
-    def _extract_dates(line: Line) -> List[str]:
-        """Return [start, end] or [start] from DATE tokens on the line."""
-        return [t.value for t in line.tokens if t.type == "DATE"]
 
     #internal → Pydantic ─
 
@@ -464,9 +464,10 @@ class ExperienceParser:
         for line in block:
             # 1 — Date range (most unambiguous)
             if self._score_date_range(line) >= 0.8:
-                dates = [t.value for t in line.tokens if t.type == "DATE"]
-                node.start_date = ParsedField(dates[0], 0.95)
-                node.end_date   = ParsedField(dates[1] if len(dates) > 1 else None, 0.95)
+                dates = line.extract_dates()
+                if dates:
+                    node.start_date = ParsedField(dates[0], 0.95)
+                    node.end_date   = ParsedField(dates[1] if len(dates) > 1 else None, 0.95)
                 continue
 
             # 2 — Description line
@@ -511,10 +512,14 @@ class ExperienceParser:
         return first_word in self._ACTION_VERBS
 
     def _score_date_range(self, line: Line) -> float:
-        date_count = sum(1 for t in line.tokens if t.type == "DATE")
-        if date_count >= 2:
+        date_tokens = [t for t in line.tokens if t.type in DATE_TYPES]
+        if not date_tokens:
+            return 0.0
+        if any(t.type in {"DATE_RANGE", "YEAR_RANGE"} for t in date_tokens):
             return 0.95
-        if date_count == 1:
+        if len(date_tokens) >= 2:
+            return 0.95
+        if len(date_tokens) == 1:
             return 0.80
         return 0.0
 
@@ -525,7 +530,7 @@ class ExperienceParser:
             score += 0.7
         if line.word_count() <= 5:
             score += 0.1
-        if line.has_type("DATE"):
+        if line.has_date():
             score -= 0.5
         return max(0.0, min(score, 1.0))
 
@@ -537,7 +542,7 @@ class ExperienceParser:
         # Title-case short line — likely a proper noun (company name)
         if line.raw.istitle() and line.word_count() <= 4:
             score += 0.4
-        if line.has_type("DATE"):
+        if line.has_date():
             score -= 0.5
         return max(0.0, min(score, 1.0))
 
