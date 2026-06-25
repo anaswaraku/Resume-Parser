@@ -26,7 +26,7 @@ from dateutil import parser as date_parser
 from dataclasses import dataclass, field
 from typing import List
 
-DATE_TYPES = {"DATE", "DATE_RANGE", "YEAR_RANGE", "DATE_DMY", "YEAR","PRESENT"}
+DATE_TYPES = {"DATE", "DATE_RANGE", "YEAR_RANGE", "DATE_DMY", "YEAR", "DATE_PRESENT"}
 
 
 @dataclass
@@ -50,7 +50,7 @@ class ParseContext:
             "bachelor",
             "master",
             "phd",
-            "PhD"
+            "PhD",
             "P.hd",
             "doctorate",
             "diploma",
@@ -197,8 +197,7 @@ class LineBuilder:
         return Line(tokens=tokens, raw=raw, line_number=line_number)
 
 class Normalizer:
-    import re
-    RULES: List[Tuple[re.Pattern, str]] = [
+    RULES: List[Tuple] = [
         (re.compile(r'\bb\.?\s*tech\.?\b',            re.I), "Bachelor of Technology"),
         (re.compile(r'\bb\.?\s*e\.?\b',               re.I), "Bachelor of Engineering"), 
         (re.compile(r'\bb\.?\s*sc\.?\b',              re.I), "Bachelor of Science"),    
@@ -284,7 +283,7 @@ def split_into_blocks(lines: List[Line]) -> List[List[Line]]:
                 has_date = False
         else:
             line_has_date = _has_strong_date(line)
-            if line_has_date and has_date:
+            if line_has_date and has_date and len(current) >= 2:
                 blocks.append(current)
                 current = [line]
                 has_date = True
@@ -446,18 +445,6 @@ class EducationParser:
         text = text.replace("()", "")
         return text.strip(" ,-•·▪▸*()")
 
-    #private helper 
-    def _assign_dates(self, line: Line, node: EducationNode | ExperienceNode, score: float):
-        """Extracts and assigns dates to a node if the score is high enough."""
-        if score < 0.8:
-            return
-        
-        dates = line.extract_dates()
-        if dates:
-            node.start_date = ParsedField(dates[0], score)
-            if len(dates) > 1:
-                node.end_date = ParsedField(dates[1], score)
-
     #scoring ────
 
     def _score_degree(self, line: Line) -> float:
@@ -565,8 +552,11 @@ class ExperienceParser:
 
         for line in block:
             # 1 — Date range (most unambiguous)
-            if not node.start_date.value:
-                self._assign_dates(line, node, self._score_date_range(line))
+            dt_score = self._score_date_range(line)
+            if dt_score >= 0.8:
+                if not node.start_date.value:
+                    self._assign_dates(line, node, dt_score)
+                continue  # date lines don't participate in role/company scoring
 
             role_score = self._score_role(line)
             company_score = self._score_company(line)
@@ -712,6 +702,17 @@ class SkillsParser:
         "and", "in", "with", "of", "for", "the", "a", "an", "at", "to",
         "is", "are", "be", "strong", "good", "excellent", "working", "ability",
     }
+    # Patterns that are definitely NOT skills — URLs, emails, dates, pure numbers
+    _SKIP_PATTERNS: List = [
+        re.compile(r'https?://|www\.|@|github\.com|linkedin\.com|\.com|\.in|\.org|\.io', re.I),
+        re.compile(r'^[\d.]+$'),                              # pure numbers / GPA
+        re.compile(r'\b\d{1,2}[/-]\d{4}\b|\b\d{4}\b'),      # year / date fragments
+        re.compile(r'^[a-z0-9._%+\-]+@[a-z0-9.\-]+\.[a-z]{2,}$', re.I),  # email
+        re.compile(                                           # month names
+            r'^(?:january|february|march|april|may|june|july|august|'
+            r'september|october|november|december|'
+            r'jan|feb|mar|apr|jun|jul|aug|sep|oct|nov|dec)$', re.I),
+    ]
 
     def parse(self, section: Optional[Section]) -> List[str]:
         if section is None:
@@ -743,10 +744,22 @@ class SkillsParser:
         for s in potential_skills:
             s_clean = s.strip(self._STRIP_CHARS)
             key = s_clean.lower()
-            if key and key not in seen and key not in self._NON_SKILL_KEYWORDS:
+            if self._is_valid_skill(s_clean) and key not in seen:
                 seen.add(key)
                 result.append(s_clean)
         return result
+
+    def _is_valid_skill(self, s: str) -> bool:
+        """Return False for URLs, emails, dates, numbers, stop-words, and very short tokens."""
+        s = s.strip()
+        if not s or len(s) <= 1:
+            return False
+        if s.lower() in self._NON_SKILL_KEYWORDS:
+            return False
+        for pat in self._SKIP_PATTERNS:
+            if pat.search(s):
+                return False
+        return True
 
 class HeaderBuilder:
     def __init__(self, context: ParseContext) -> None:

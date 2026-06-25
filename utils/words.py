@@ -222,8 +222,7 @@ _SYNONYMS: dict[str, str] = { # Alias -> Canonical Form
 #Keyword extraction fallback 
 
 _STOP: set[str] = {
-    # A more comprehensive set of stop words for keyword extraction,
-    # combining standard English stop words with common resume/JD filler words.
+    # ── Standard English stop words ───────────────────────────────────────────
     "a", "about", "ability", "above", "academic", "achievements", "activities",
     "after", "again", "all", "also", "am", "an", "and", "analytical", "any",
     "applications", "apply", "are", "as", "at", "background", "be",
@@ -258,6 +257,28 @@ _STOP: set[str] = {
     "were", "what", "when", "where", "which", "while", "who", "whom", "why",
     "will", "with", "work", "working", "world", "would", "year", "years",
     "you", "your", "yours", "yourself", "yourselves",
+    # ── JD structural / boilerplate words ────────────────────────────────────
+    "posted", "since", "organization", "field", "employment", "type",
+    "mode", "hybrid", "onsite", "office", "site", "full", "time",
+    "part", "contract", "permanent", "temporary", "fresher",
+    "accelerated", "across", "advantage", "agentic", "applying",
+    "approach", "architecture", "broadly", "cars", "ships",
+    "manufacture", "manufactured", "many", "skyscrapers",
+    # ── Indian city / state / location names ─────────────────────────────────
+    "india", "pune", "maharashtra", "mumbai", "bangalore", "bengaluru",
+    "hyderabad", "chennai", "delhi", "noida", "gurugram", "gurgaon",
+    "kochi", "thrissur", "kerala", "karnataka", "tamil",
+    # ── Company / legal entity noise ─────────────────────────────────────────
+    "private", "limited", "pvt", "ltd", "inc", "corp", "llc",
+    # ── Month abbreviations (appear in "Posted since Jun-2026" etc.) ─────────
+    "jan", "feb", "mar", "apr", "jun", "jul", "aug",
+    "sep", "oct", "nov", "dec",
+    # Full month names
+    "january", "february", "march", "april", "june", "july", "august",
+    "september", "october", "november", "december",
+    # Other common JD noise missed above
+    "need", "needs", "help", "take", "takes", "get", "make", "makes",
+    "see", "keep", "give", "know", "find", "based",
 }
 
 
