@@ -31,6 +31,11 @@ class JobMatchResult(BaseModel):
     extraction_method: str          # "llm" | "keyword"
 
 
+class BestMatchResult(BaseModel):
+    filename: str
+    match: JobMatchResult
+
+
 # ── JD metadata stripping ──────────────────────────────────────────────────────
 
 # Additional noise tokens that slip past _STOP (location names, company

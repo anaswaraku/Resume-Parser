@@ -20,7 +20,7 @@ from llm_parser import LLMParser
 from lexer import Lexer
 from parser import ResumeParser
 from merger import merge, traditional_only, ParseResponse
-from job_matcher import match_job, JobMatchResult
+from job_matcher import match_job, JobMatchResult, BestMatchResult
 
 load_dotenv()
 
@@ -36,6 +36,7 @@ app = FastAPI(
         "Supports single-file hybrid parsing, batch processing, and job-description matching."
     ),
     version="1.0.0",
+    openapi_version="3.0.3",
 )
 
 SUPPORTED_EXTENSIONS = {".pdf", ".docx", ".txt", ".rtf"}
@@ -149,3 +150,54 @@ async def match_job_endpoint(
         jd_text=job_description,
         jd_skills_llm=jd_skills_llm,
     )
+
+
+@app.post(
+    "/find-match",
+    response_model=BestMatchResult,
+    summary="Find best matching resume from a batch for a job description",
+)
+async def find_match(
+    files: Annotated[list[UploadFile], File(description="Up to 10 resume files (PDF / DOCX / TXT / RTF)")],
+    job_description: Annotated[str, Form(description="Job description text")],
+    use_llm: bool = Query(default=True, description="Use LLM to extract resume skills and JD skills"),
+):
+    if not files:
+        raise HTTPException(status_code=400, detail="No files uploaded.")
+    if len(files) > MAX_BATCH_SIZE:
+        raise HTTPException(status_code=400, detail=f"Cannot process more than {MAX_BATCH_SIZE} files at once.")
+
+    # Extract JD skills once (shared across all resumes)
+    jd_skills_llm = None
+    if use_llm:
+        try:
+            jd_skills_llm = llm_parser.extract_jd_skills(job_description)
+        except Exception:
+            jd_skills_llm = None # fall through to keyword mode silently
+
+    async def _process_one_file(file: UploadFile):
+        try:
+            ext  = _validate_upload(file)
+            text = await _extract_text(file, ext)
+            parse_result  = _parse_text(text, use_llm)
+            resume_skills = parse_result.merged_result.skills or []
+            match_result = match_job(
+                resume_skills=resume_skills,
+                resume_text=text,
+                jd_text=job_description,
+                jd_skills_llm=jd_skills_llm,
+            )
+            return {"filename": file.filename, "match": match_result}
+        except Exception:
+            return None
+
+    tasks = [_process_one_file(file) for file in files]
+    results = await asyncio.gather(*tasks)
+    valid_results = [r for r in results if r is not None]
+
+    if not valid_results:
+        raise HTTPException(status_code=400, detail="Could not process any of the uploaded files successfully.")
+
+    return max(valid_results, key=lambda r: r["match"].score)
+
+
