@@ -3,6 +3,7 @@ from utils.file_extractor import extract_text_from_pdf, extract_text_from_docx, 
 from llm_parser import LLMParser
 from lexer import Lexer
 from parser import ResumeParser
+from merger import merge, traditional_only
 
 import os
 import tempfile
@@ -67,13 +68,15 @@ async def parse_resume_hybrid(
     if not text.strip():
         raise HTTPException(status_code=400, detail="File appears to be empty or unreadable.")
 
-    # Route to LLM or traditional parser
+    # Always run traditional parser
+    tokens = Lexer().tokenize(text)
+    traditional_result = ResumeParser().build(tokens=tokens)
+
     if use_llm:
         try:
-            return llm_parser.parse_with_llm(text)
+            llm_result = llm_parser.parse_with_llm(text)
+            return merge(traditional=traditional_result, llm=llm_result)
         except Exception as e:
-            raise HTTPException(status_code=500, detail=f"LLM parsing failed: {e}")
+            raise HTTPException(status_code=500, detail=f"Hybrid parsing failed: {e}")
     else:
-        tokens = Lexer().tokenize(text)
-        sections = ResumeParser().build(tokens=tokens)
-        return sections
+        return traditional_only(traditional=traditional_result)

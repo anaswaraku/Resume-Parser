@@ -1,6 +1,14 @@
 import re
 from dataclasses import dataclass
 from typing import List, Tuple
+from utils.regex_patterns import MONTH_STR, YEAR_STR, SEP_STR, RANGE_SEP_STR, PRESENT_STR
+
+
+# (?i) makes them case-insensitive so "may", "MAY", "May" all match.
+_DATE = fr'(?i)\b{MONTH_STR}\.?{SEP_STR}{YEAR_STR}\b'
+_DATE_DMY = fr'(?i)\b\d{{1,2}}{SEP_STR}{MONTH_STR}\.?{SEP_STR}{YEAR_STR}\b'
+_DATE_RANGE = fr'(?i)\b{MONTH_STR}\.?{SEP_STR}{YEAR_STR}{RANGE_SEP_STR}(?:{MONTH_STR}\.?{SEP_STR}{YEAR_STR}|{PRESENT_STR})\b'
+_YEAR_RANGE = fr'(?i)\b{YEAR_STR}{RANGE_SEP_STR}(?:{YEAR_STR}|\d{{2}}|{PRESENT_STR})\b'
 
 #automatically creates constructors and utility methods
 @dataclass
@@ -30,42 +38,19 @@ class Lexer:
         re.compile( r'https?://[^\s]+|www\.[^\s]+'
          r'|linkedin\.com/in/[^\s]+'
          r'|github\.com/[^\s]+')),
-        # ── Dates — most specific first ───────────────────────
-        # Range with full month names: "January 2020 - March 2024" or "Jan 2020 – Present"
-        ('DATE_RANGE',
-         re.compile(r'\b(?:January|February|March|April|May|June|July|August|September|'
-         r'October|November|December|'
-         r'Jan|Feb|Mar|Apr|Jun|Jul|Aug|Sep|Oct|Nov|Dec)'
-         r'\.?\s+\d{4}'
-         r'\s*[-–—to]+\s*'
-         r'(?:January|February|March|April|May|June|July|August|September|'
-         r'October|November|December|'
-         r'Jan|Feb|Mar|Apr|Jun|Jul|Aug|Sep|Oct|Nov|Dec'
-         r'\.?\s+\d{4}|[Pp]resent|[Cc]urrent|[Nn]ow)')),
-        # Year range: "2021 – 2024" or "2021 - Present"
-        ('YEAR_RANGE',
-         re.compile(r'\b(19|20)\d{2}\s*[-–—to]+\s*(?:(19|20)\d{2}|[Pp]resent|[Cc]urrent)\b')),
-        # Single month+year: "Jun 2020" or "June 2020"
-        ('DATE',
-         re.compile(r'\b(?:January|February|March|April|May|June|July|August|September|'
-         r'October|November|December|'
-         r'Jan|Feb|Mar|Apr|Jun|Jul|Aug|Sep|Oct|Nov|Dec)'
-         r'\.?\s+\d{4}\b')),
-        # Day Month Year: "22 June 2026" or "15 March 2000"
-        ('DATE_DMY',
-         re.compile(r'\b\d{1,2}\s+'
-         r'(?:January|February|March|April|May|June|July|August|September|'
-         r'October|November|December|'
-         r'Jan|Feb|Mar|Apr|Jun|Jul|Aug|Sep|Oct|Nov|Dec)'
-         r'\s+\d{4}\b')),
+        #Dates — most specific first 
+        ('DATE_RANGE', re.compile(_DATE_RANGE)),
+        ('YEAR_RANGE', re.compile(_YEAR_RANGE)),
+        ('DATE_DMY',   re.compile(_DATE_DMY)),
+        ('DATE',       re.compile(_DATE)),
         # Standalone year
-        ('YEAR',
-         re.compile(r'\b(19|20)\d{2}\b')),
-        # ── Structure ─────────────────────────────────────────
+        ('YEAR',       re.compile(fr'\b{YEAR_STR}\b')),
+        ('DATE_PRESENT',re.compile(fr'(?i)\b{PRESENT_STR}\b') ),
+        #Structure
         ('NEWLINE',  re.compile( r'\n')),
-        ('SEPARATOR', re.compile(r'[|•·,;/\\]')),
+        ('SEPARATOR', re.compile(r'[|•·,;/\\–—-]')),
         ('SKIP',re.compile(r'[ \t\r]+')),     # horizontal whitespace — drop
-        # ── Catch-all — must be last ──────────────────────────
+        #Catch-all — must be last 
         ('WORD', re.compile(r"[A-Za-z0-9_.'\-]+")),]
 
     _SKIP = re.compile(r'[ \t\r]+')#white space-spaces,tabs - discard
