@@ -60,6 +60,33 @@ class LLMParser:
         except Exception:
             logger.exception("Groq API error")
             return ResumeAST()
+            
+    def extract_jd_skills_with_llm(self, jd_text: str) -> list[str]:
+        """Extract skills from a job description using LLM."""
+        truncated = jd_text[:MAX_RESUME_CHARS]
+        try:
+            response = self.client.chat.completions.create(
+                model=self.model,
+                temperature=0,
+                max_tokens=1024,
+                messages=[
+                    {"role": "system", "content": 'You are an expert HR. Extract all skills from this job description. Return ONLY a valid JSON array of strings. For example: ["Python", "AWS", "Communication"]. Do not return anything else.'},
+                    {"role": "user",   "content": truncated},
+                ]
+            )
+            llm_output = response.choices[0].message.content
+            content = llm_output.strip() if llm_output else ""
+            if "```" in content:
+                match = re.search(r"```(?:json)?\s*(.*?)\s*```", content, re.DOTALL)
+                if match:
+                    content = match.group(1).strip()
+            data = json.loads(content)
+            if isinstance(data, list):
+                return [str(item) for item in data]
+            return []
+        except Exception:
+            logger.exception("Groq API error while extracting JD skills")
+            return []
  
     def _build_prompt(self) -> str:
         return """You are an expert resume parser. Extract all information and return ONLY valid JSON.

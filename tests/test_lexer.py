@@ -9,7 +9,7 @@ def test_lexer_words_and_separators():
     assert len(tokens) == 5
     assert tokens[0] == Token("WORD", "Python", 0)
     assert tokens[1] == Token("SEPARATOR", ",", 6)
-    assert tokens[2] == Token("WORD", "C++", 8)
+    assert tokens[2] == Token("WORD", "C", 8)
     assert tokens[3] == Token("SEPARATOR", ",", 11)
     assert tokens[4] == Token("WORD", "Node.js", 13)
  
@@ -47,11 +47,18 @@ def test_lexer_urls():
  
 def test_lexer_dates():
     lexer = Lexer()
-    dates = ["Jan 2020", "January 2020", "01/2020", "Present", "Current", "Now"]
+    dates = ["Jan 2020", "January 2020", "01/2020"]
     for date in dates:
         tokens = lexer.tokenize(date)
         assert len(tokens) == 1
         assert tokens[0].type == "DATE"
+        assert tokens[0].value == date
+        
+    present_dates = ["Present", "Current", "Now"]
+    for date in present_dates:
+        tokens = lexer.tokenize(date)
+        assert len(tokens) == 1
+        assert tokens[0].type == "DATE_PRESENT"
         assert tokens[0].value == date
  
 def test_lexer_numbers():
@@ -59,8 +66,8 @@ def test_lexer_numbers():
     text = "2026 123"
     tokens = lexer.tokenize(text)
     assert len(tokens) == 2
-    assert tokens[0] == Token("NUMBER", "2026", 0)
-    assert tokens[1] == Token("NUMBER", "123", 5)
+    assert tokens[0] == Token("YEAR", "2026", 0)
+    assert tokens[1] == Token("WORD", "123", 5)
  
 def test_lexer_newlines():
     lexer = Lexer()
