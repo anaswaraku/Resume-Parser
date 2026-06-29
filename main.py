@@ -70,7 +70,9 @@ async def _extract_text_from_upload(file: UploadFile) -> str:
             os.unlink(tmp_path)
 
     if not text.strip():
-        raise HTTPException(status_code=400, detail="File appears to be empty or unreadable.")
+        raise HTTPException(
+            status_code=400, detail="File appears to be empty or unreadable."
+        )
     return text
 
 
@@ -122,6 +124,7 @@ def _build_match_result(
 
 # Endpoints
 
+
 @app.get("/", tags=["Status"])
 def home():
     return {"status": "ok"}
@@ -153,9 +156,13 @@ async def parse_resume_hybrid(
 
 @app.post("/match-job", response_model=JobMatchResult, tags=["Matching"])
 async def match_job_endpoint(
-    file: Annotated[UploadFile, File(description="Resume file (PDF / DOCX / TXT / RTF)")],
+    file: Annotated[
+        UploadFile, File(description="Resume file (PDF / DOCX / TXT / RTF)")
+    ],
     job_description: Annotated[str, Form(description="Job description text")],
-    use_llm: bool = Query(default=True, description="Use LLM to extract resume skills and JD skills"),
+    use_llm: bool = Query(
+        default=True, description="Use LLM to extract resume skills and JD skills"
+    ),
 ):
     """
     Matches a resume file against a job description.
@@ -173,7 +180,9 @@ async def match_job_endpoint(
     try:
         resume_text = await _extract_text_from_upload(file)
         jd_skills_list = _extract_jd_skills(job_description, use_llm)
-        return _build_match_result(file, resume_text, job_description, use_llm, jd_skills_list)
+        return _build_match_result(
+            file, resume_text, job_description, use_llm, jd_skills_list
+        )
     except HTTPException:
         raise
     except Exception as e:
@@ -202,9 +211,14 @@ async def parse_resume_batch(
 
 @app.post("/match-job-batch", tags=["Matching"])
 async def match_job_batch_endpoint(
-    files: Annotated[list[UploadFile], File(description="Up to 10 resume files (PDF / DOCX / TXT / RTF)")],
+    files: Annotated[
+        list[UploadFile],
+        File(description="Up to 10 resume files (PDF / DOCX / TXT / RTF)"),
+    ],
     job_description: Annotated[str, Form(description="Job description text")],
-    use_llm: bool = Query(default=True, description="Use LLM to extract resume skills and JD skills"),
+    use_llm: bool = Query(
+        default=True, description="Use LLM to extract resume skills and JD skills"
+    ),
 ):
     if len(files) > 10:
         raise HTTPException(status_code=400, detail="Maximum 10 files allowed")
@@ -213,17 +227,25 @@ async def match_job_batch_endpoint(
     jd_skills_list = _extract_jd_skills(job_description, use_llm)
 
     results = []
+    errors = []
     for file in files:
+        filename = file.filename or "unknown"
         try:
             resume_text = await _extract_text_from_upload(file)
             match_res = _build_match_result(
                 file, resume_text, job_description, use_llm, jd_skills_list
             )
-            results.append({"filename": file.filename or "unknown", "match": match_res})
-        except Exception:
-            pass  # Preserve original behaviour: silently skip failed files in batch
+            results.append({"filename": filename, "match": match_res})
+        except Exception as e:
+            # Instead of silently skipping, record the error
+            errors.append(
+                {
+                    "filename": filename,
+                    "error": str(e) if not isinstance(e, HTTPException) else e.detail,
+                }
+            )
 
     sorted_results = sorted(results, key=lambda x: x["match"].score, reverse=True)
     best_match = sorted_results[0]["filename"] if sorted_results else None
 
-    return {"best_match": best_match, "results": sorted_results}
+    return {"best_match": best_match, "results": sorted_results, "errors": errors}

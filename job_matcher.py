@@ -18,22 +18,151 @@ from typing import List, Set, Optional
 from pydantic import BaseModel
 from utils.key_words import _SYNONYMS, _STOP, _MULTI_WORD_SKILLS
 
-
 # ── Response model ─────────────────────────────────────────────────────────────
+
 
 class JobMatchResult(BaseModel):
     """Final Output"""
+
     matched_skills: List[str]
     missing_skills: List[str]
-    extra_skills:   List[str]       # on resume but not required by JD
-    score:          float           # 0.0 – 1.0
-    score_pct:      float           # 0.0 – 100.0
-    extraction_method: str          # "llm" | "keyword"
+    extra_skills: List[str]  # on resume but not required by JD
+    score: float  # 0.0 – 1.0
+    score_pct: float  # 0.0 – 100.0
+    extraction_method: str  # "llm" | "keyword"
 
 
 class BestMatchResult(BaseModel):
     filename: str
     match: JobMatchResult
+
+
+# ── Normalisation ──────────────────────────────────────────────────────────────
+
+
+def _normalise(skill: str) -> str:
+    """Lowercase, strip punctuation noise, apply synonym map."""
+    s = re.sub(r"\s*\([^)]*\)", "", skill).strip()
+    s_lower = s.lower().strip(" .,;:-")
+    return _SYNONYMS.get(s_lower, s_lower)
+
+
+def _normalise_set(skills: List[str]) -> Set[str]:
+    """Normalises a list of skills to a set of canonical forms."""
+    return {_normalise(s) for s in skills if s and s.strip()}
+
+
+# ── Skill Concept Mapping ──────────────────────────────────────────────────────
+
+# This map groups specific technologies under general concepts.
+# This allows matching "GitHub Actions" on a resume to a "CI/CD" requirement.
+_SKILL_CONCEPTS = {
+    # General Concept: [list of related specific skills and aliases]
+    "ci/cd": [
+        "ci/cd",
+        "cicd",
+        "github actions",
+        "jenkins",
+        "gitlab ci",
+        "circleci",
+        "continuous integration",
+        "continuous delivery",
+        "continuous deployment",
+        "automation",
+    ],
+    "api": [
+        "api",
+        "apis",
+        "api integration",
+        "rest",
+        "restful",
+        "rest apis",
+        "fastapi",
+        "graphql",
+        "integration",
+    ],
+    "mlops": [
+        "mlops",
+        "mlflow",
+        "kubeflow",
+        "docker",
+        "kubernetes",
+        "model deployment",
+        "model training",
+        "model versioning",
+        "monitoring",
+        "retraining",
+        "deployment",
+        "inference",
+        "observability",
+        "workflow building",
+    ],
+    "cloud": [
+        "cloud",
+        "cloud services",
+        "cloud ai",
+        "aws",
+        "azure",
+        "gcp",
+        "google cloud",
+        "amazon web services",
+        "amazon bedrock",
+        "aws sagemaker",
+        "azure ml",
+        "azure openai",
+        "gcp vertex ai",
+    ],
+    "data engineering": [
+        "data engineering",
+        "data ingestion",
+        "data platforms",
+        "airflow",
+    ],
+    "data science": [
+        "data science",
+        "pandas",
+        "numpy",
+        "scikit-learn",
+        "model development",
+    ],
+    "deep learning": [
+        "deep learning",
+        "pytorch",
+        "tensorflow",
+        "keras",
+        "neural networks",
+        "hugging face",
+        "transformers",
+        "llms",
+        "rag",
+        "model development",
+    ],
+    "nlp": ["nlp", "natural language processing", "langchain", "llamaindex", "rag"],
+    "containerization": ["containerization", "docker", "kubernetes", "k8s"],
+    "orchestration": [
+        "orchestration",
+        "kubernetes",
+        "kubeflow",
+        "airflow",
+        "workflow building",
+    ],
+    "testing": ["testing", "pytest", "unittest"],
+    "infrastructure as code": ["iac", "terraform", "ansible", "cloudformation"],
+    "solution design": [
+        "solution design",
+        "ai architecture",
+        "architectural guidance",
+        "technical solutions",
+        "ai engineering",
+    ],
+}
+
+# Create a reverse map from specific skill to general concept for quick lookups
+_SKILL_TO_CONCEPT_MAP = {
+    _normalise(skill): concept
+    for concept, skills in _SKILL_CONCEPTS.items()
+    for skill in skills
+}
 
 
 # ── JD metadata stripping ──────────────────────────────────────────────────────
@@ -42,35 +171,96 @@ class BestMatchResult(BaseModel):
 # metadata, date formats, boilerplate fragments specific to JD headers).
 _JD_NOISE: Set[str] = {
     # Location / company boilerplate
-    "india", "pune", "maharashtra", "mumbai", "bangalore", "bengaluru",
-    "hyderabad", "chennai", "delhi", "noida", "gurugram", "gurgaon",
-    "kochi", "thrissur", "kerala", "karnataka", "tamil",
-    "siemens", "infosys", "tcs", "wipro", "accenture", "cognizant",
-    "private", "limited", "pvt", "ltd", "inc", "corp", "llc",
+    "india",
+    "pune",
+    "maharashtra",
+    "mumbai",
+    "bangalore",
+    "bengaluru",
+    "hyderabad",
+    "chennai",
+    "delhi",
+    "noida",
+    "gurugram",
+    "gurgaon",
+    "kochi",
+    "thrissur",
+    "kerala",
+    "karnataka",
+    "tamil",
+    "siemens",
+    "infosys",
+    "tcs",
+    "wipro",
+    "accenture",
+    "cognizant",
+    "private",
+    "limited",
+    "pvt",
+    "ltd",
+    "inc",
+    "corp",
+    "llc",
     # JD structural keywords
-    "posted", "since", "organization", "field", "employment", "type",
-    "mode", "hybrid", "onsite", "office", "site", "full", "time",
-    "part", "contract", "permanent", "temporary", "fresher",
+    "posted",
+    "since",
+    "organization",
+    "field",
+    "employment",
+    "type",
+    "mode",
+    "hybrid",
+    "onsite",
+    "office",
+    "site",
+    "full",
+    "time",
+    "part",
+    "contract",
+    "permanent",
+    "temporary",
+    "fresher",
     # Filler adjectives / adverbs common in JDs
-    "accelerated", "across", "advantage", "agentic", "applying",
-    "approach", "architecture", "broadly", "cars", "ships",
-    "manufacture", "manufactured", "many", "skyscrapers",
+    "accelerated",
+    "across",
+    "advantage",
+    "agentic",
+    "applying",
+    "approach",
+    "architecture",
+    "broadly",
+    "cars",
+    "ships",
+    "manufacture",
+    "manufactured",
+    "many",
+    "skyscrapers",
     # Date-like tokens
-    "jan", "feb", "mar", "apr", "may", "jun", "jul", "aug",
-    "sep", "oct", "nov", "dec",
+    "jan",
+    "feb",
+    "mar",
+    "apr",
+    "may",
+    "jun",
+    "jul",
+    "aug",
+    "sep",
+    "oct",
+    "nov",
+    "dec",
 }
 
 _JD_METADATA_RE = re.compile(
-    r'^.*?(?=position\s+overview|about\s+the\s+role|responsibilities|'
-    r'job\s+description\b|overview\b|about\s+us|what\s+you|'
-    r'we\s+are\s+looking|requirements\b|qualifications\b)',
+    r"^.*?(?=position\s+overview|about\s+the\s+role|responsibilities|"
+    r"job\s+description\b|overview\b|about\s+us|what\s+you|"
+    r"we\s+are\s+looking|requirements\b|qualifications\b)",
     re.I | re.DOTALL,
 )
 
 _DATE_TOKEN_RE = re.compile(
-    r'^\d{2}-[a-z]{3}-\d{4}$'   # jun-2026
-    r'|^\d{4}$'                  # 2024
-    r'|^\d{1,2}/\d{4}$',        # 06/2026
+    r"^\d{2}-[a-z]{3}-\d{4}$"  # jun-2026
+    r"|^\d{4}$"  # 2024
+    r"|^\d{1,2}/\d{4}$",  # 06/2026
     re.I,
 )
 
@@ -82,25 +272,12 @@ def _strip_jd_metadata(jd_text: str) -> str:
     """
     m = _JD_METADATA_RE.match(jd_text)
     if m and m.end() < len(jd_text):
-        return jd_text[m.end():]
+        return jd_text[m.end() :]
     return jd_text
 
 
-# ── Normalisation ──────────────────────────────────────────────────────────────
-
-def _normalise(skill: str) -> str:
-    """Lowercase, strip punctuation noise, apply synonym map."""
-    s = re.sub(r'\s*\([^)]*\)', '', skill).strip()
-    s_lower = s.lower().strip(" .,;:-")
-    return _SYNONYMS.get(s_lower, s_lower)
-
-
-def _normalise_set(skills: List[str]) -> Set[str]:
-    """Normalises a list of skills to a set of canonical forms."""
-    return {_normalise(s) for s in skills if s and s.strip()}
-
-
 # ── Keyword extraction (keyword-fallback path) ─────────────────────────────────
+
 
 def _is_noise_token(tok: str) -> bool:
     """True for tokens that are definitely not skills."""
@@ -117,9 +294,9 @@ def _is_noise_token(tok: str) -> bool:
 def _extract_keywords(text: str) -> Set[str]:
     # Strip emails and URLs before tokenisation so they don't fragment into
     # pseudo-tokens like "gmail.com", "arjun", "linkedin"
-    text = re.sub(r'[A-Za-z0-9._%+\-]+@[A-Za-z0-9.\-]+\.[A-Za-z]{2,}', ' ', text)
-    text = re.sub(r'https?://\S+|www\.\S+', ' ', text)
-    text = re.sub(r'\b[A-Za-z0-9.\-]+\.(com|in|org|io|net|ai|co)\b', ' ', text)
+    text = re.sub(r"[A-Za-z0-9._%+\-]+@[A-Za-z0-9.\-]+\.[A-Za-z]{2,}", " ", text)
+    text = re.sub(r"https?://\S+|www\.\S+", " ", text)
+    text = re.sub(r"\b[A-Za-z0-9.\-]+\.(com|in|org|io|net|ai|co)\b", " ", text)
 
     text_lower = text.lower()
     found: Set[str] = set()
@@ -141,8 +318,20 @@ def _extract_keywords(text: str) -> Set[str]:
 # ── Fuzzy token-overlap matching ───────────────────────────────────────────────
 
 _MATCH_STOP: Set[str] = {
-    "and", "or", "with", "for", "the", "a", "an", "of", "in",
-    "to", "using", "based", "driven", "oriented",
+    "and",
+    "or",
+    "with",
+    "for",
+    "the",
+    "a",
+    "an",
+    "of",
+    "in",
+    "to",
+    "using",
+    "based",
+    "driven",
+    "oriented",
 }
 
 
@@ -154,7 +343,7 @@ def _skill_tokens(s: str) -> Set[str]:
     """
     s = s.lower().strip()
     s = re.sub(r"[^\w\s\-]", "", s)
-    tokens = re.findall(r'\b[a-z][a-z0-9\-]{0,}\b', s)
+    tokens = re.findall(r"\b[a-z][a-z0-9\-]{0,}\b", s)
     return {t for t in tokens if t not in _MATCH_STOP and len(t) > 1}
 
 
@@ -162,18 +351,27 @@ def _skills_match(resume_skill: str, jd_skill: str, threshold: float = 0.6) -> b
     """
     True if resume_skill and jd_skill refer to the same skill.
 
-    Uses token overlap so single-word resume skills match multi-word JD phrases:
-      "python"         vs "Python development"  → overlap=1, smaller=1 → 1.0 ✅
-      "sql"            vs "SQL databases"        → overlap=1, smaller=1 → 1.0 ✅
-      "machine learning" vs "Machine Learning"  → overlap=2, smaller=2 → 1.0 ✅
-      "git"            vs "Git workflows"        → overlap=1, smaller=1 → 1.0 ✅
+    Uses a multi-layered approach:
+    1. Direct/synonym match (e.g., "python" vs "Python")
+    2. Concept match (e.g., "GitHub Actions" vs "CI/CD")
+    3. Token overlap (e.g., "git" vs "Git workflows")
     """
-    # Fast path: exact normalised match
-    if _normalise(resume_skill) == _normalise(jd_skill):
+    norm_resume_skill = _normalise(resume_skill)
+    norm_jd_skill = _normalise(jd_skill)
+
+    # 1. Direct/synonym match (fastest)
+    if norm_resume_skill == norm_jd_skill:
         return True
 
-    r_tokens = _skill_tokens(resume_skill)
-    j_tokens = _skill_tokens(jd_skill)
+    # 2. Concept match: check if both skills belong to the same concept group.
+    resume_concept = _SKILL_TO_CONCEPT_MAP.get(norm_resume_skill)
+    jd_concept = _SKILL_TO_CONCEPT_MAP.get(norm_jd_skill)
+    if resume_concept and resume_concept == jd_concept:
+        return True
+
+    # 3. Fallback to original token overlap logic
+    r_tokens = _skill_tokens(norm_resume_skill)
+    j_tokens = _skill_tokens(norm_jd_skill)
     if not r_tokens or not j_tokens:
         return False
 
@@ -184,30 +382,36 @@ def _skills_match(resume_skill: str, jd_skill: str, threshold: float = 0.6) -> b
 
 # ── Core match computation ─────────────────────────────────────────────────────
 
+
 def _compute_match(
     resume_skills: List[str],
-    jd_skills:     List[str],
-    method:        str,
+    jd_skills: List[str],
+    method: str,
 ) -> JobMatchResult:
     """
     Fuzzy token-overlap matching between resume skills and JD skills.
     Returns matched/missing/extra lists and a score.
     """
     if not jd_skills:
+        unique_resume_skills = sorted(list(set(s for s in resume_skills if s)))
         return JobMatchResult(
             matched_skills=[],
             missing_skills=[],
-            extra_skills=sorted(resume_skills),
+            extra_skills=unique_resume_skills,
             score=0.0,
             score_pct=0.0,
             extraction_method=method,
         )
 
-    matched_jd:  List[str] = []
-    missing_jd:  List[str] = []
+    # Deduplicate and sort input lists to prevent duplicates in the output
+    unique_jd_skills = sorted(list(set(s for s in jd_skills if s)))
+    unique_resume_skills = sorted(list(set(s for s in resume_skills if s)))
 
-    for jd_skill in jd_skills:
-        if any(_skills_match(rs, jd_skill) for rs in resume_skills):
+    matched_jd: List[str] = []
+    missing_jd: List[str] = []
+
+    for jd_skill in unique_jd_skills:
+        if any(_skills_match(rs, jd_skill) for rs in unique_resume_skills):
             matched_jd.append(jd_skill)
         else:
             missing_jd.append(jd_skill)
@@ -215,11 +419,12 @@ def _compute_match(
     # Extra = resume skills not covered by any matched JD skill
     matched_jd_set = set(matched_jd)
     extra_resume: List[str] = [
-        rs for rs in resume_skills
+        rs
+        for rs in unique_resume_skills
         if not any(_skills_match(rs, js) for js in matched_jd_set)
     ]
 
-    score = len(matched_jd) / len(jd_skills)
+    score = len(matched_jd) / len(unique_jd_skills) if unique_jd_skills else 0
 
     return JobMatchResult(
         matched_skills=sorted(matched_jd),
@@ -233,18 +438,19 @@ def _compute_match(
 
 # ── Public API ─────────────────────────────────────────────────────────────────
 
+
 def match_job(
     resume_skills: List[str],
-    resume_text:   str,
-    jd_text:       str,
-    jd_skills_llm: Optional[List[str]] = None,   # pre-extracted by LLM
+    resume_text: str,
+    jd_text: str,
+    jd_skills_llm: Optional[List[str]] = None,  # pre-extracted by LLM
 ) -> JobMatchResult:
     """
     Compare resume against a job description.
 
     LLM path  (jd_skills_llm provided):
       - Uses LLM-extracted, structured JD skills.
-      - Resume skills augmented by keyword extraction on full resume text.
+      - Uses resume skills as extracted by the LLM parser.
       - Fuzzy token-overlap matching handles single-word vs phrase granularity.
 
     Keyword fallback (jd_skills_llm is None):
@@ -252,13 +458,10 @@ def match_job(
       - Same fuzzy matching applied.
     """
     if jd_skills_llm is not None:
-        # Augment parsed resume skills with keyword extraction on full resume text
-        resume_kw = _extract_keywords(" ".join(resume_skills) + " " + resume_text)
-        # Combine: parsed skills take display priority, keywords fill gaps
-        all_resume = list({s.lower(): s for s in list(resume_skills) + sorted(resume_kw)}.values())
-
+        # With the LLM path, we trust the LLM to have extracted all relevant skills
+        # from the resume, so we use that list directly.
         return _compute_match(
-            resume_skills=all_resume,
+            resume_skills=resume_skills,
             jd_skills=jd_skills_llm,
             method="llm",
         )
@@ -266,9 +469,11 @@ def match_job(
         # Strip JD header before keyword extraction
         jd_body = _strip_jd_metadata(jd_text)
         resume_kw = _extract_keywords(" ".join(resume_skills) + " " + resume_text)
-        jd_kw     = _extract_keywords(jd_body)
+        jd_kw = _extract_keywords(jd_body)
 
-        all_resume = list({s.lower(): s for s in list(resume_skills) + sorted(resume_kw)}.values())
+        all_resume = list(
+            {s.lower(): s for s in list(resume_skills) + sorted(resume_kw)}.values()
+        )
 
         return _compute_match(
             resume_skills=all_resume,

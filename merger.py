@@ -2,9 +2,10 @@
 Result Merging (Hybrid approach).
 
 Merge strategy:
-  - Traditional parser wins on contact info (name, email, phone) and education.
+  - Traditional parser wins on contact info (name, email, phone).
+  - LLM wins on education, experience, and skills.
   - LLM fills in experience and skills (traditional parser leaves these empty).
-  - If traditional parser fails to find contact info or education, it falls back to the LLM.
+  - If the preferred parser fails for a field, the other parser's result is used as a fallback.
 """
 
 from __future__ import annotations
@@ -13,8 +14,8 @@ from typing import List
 from ast_models import Education, Experience, ResumeAST
 from pydantic import BaseModel
 
-
 # ── Output models ─────────────────────────────────────────────────────────────
+
 
 class MergedResult(BaseModel):
     name: str | None = None
@@ -27,29 +28,34 @@ class MergedResult(BaseModel):
 
 class ConfidenceScore(BaseModel):
     """Per-field flags showing which fields the LLM contributed."""
+
     name_from_llm: bool = False
     email_from_llm: bool = False
     phone_from_llm: bool = False
     education_added_by_llm: int = 0
     experience_added_by_llm: int = 0
     skills_added_by_llm: int = 0
-    improvement_pct: float = 0.0        # 0-100
+    improvement_pct: float = 0.0  # 0-100
 
 
 class ParseResponse(BaseModel):
     traditional_parser: MergedResult
     llm_parser: MergedResult | None = None
     merged_result: MergedResult
-    parsing_method: str                 # "hybrid" | "traditional_only"
+    parsing_method: str  # "hybrid" | "traditional_only"
     confidence: ConfidenceScore | None = None
 
 
 # ── Internal helpers ──────────────────────────────────────────────────────────
 
+
 def _ast_to_merged(ast: ResumeAST) -> MergedResult:
     return MergedResult(
-        name=ast.name, email=ast.email, phone=ast.phone,
-        education=ast.education, experience=ast.experience,
+        name=ast.name,
+        email=ast.email,
+        phone=ast.phone,
+        education=ast.education,
+        experience=ast.experience,
         skills=ast.skills,
     )
 
@@ -61,25 +67,27 @@ def _compute_confidence(
     merged_exp: List[Experience],
     merged_skills: List[str],
 ) -> ConfidenceScore:
-    name_from_llm  = not traditional.name and bool(llm.name)
+    name_from_llm = not traditional.name and bool(llm.name)
     email_from_llm = not traditional.email and bool(llm.email)
     phone_from_llm = not traditional.phone and bool(llm.phone)
 
     # For education, if traditional was empty and we used LLM, then all are from LLM
     edu_added = len(llm.education) if not traditional.education and llm.education else 0
-    
+
     # Experience and skills are always from LLM in the new logic
     exp_added = len(merged_exp)
     skills_added = len(merged_skills)
 
-    improved_slots = sum([
-        name_from_llm,
-        email_from_llm,
-        phone_from_llm,
-        bool(edu_added),
-        bool(exp_added),
-        bool(skills_added),
-    ])
+    improved_slots = sum(
+        [
+            name_from_llm,
+            email_from_llm,
+            phone_from_llm,
+            bool(edu_added),
+            bool(exp_added),
+            bool(skills_added),
+        ]
+    )
     improvement_pct = round(improved_slots / 6 * 100, 1)
 
     return ConfidenceScore(
@@ -95,16 +103,17 @@ def _compute_confidence(
 
 # ── Public API ────────────────────────────────────────────────────────────────
 
+
 def merge(traditional: ResumeAST, llm: ResumeAST) -> ParseResponse:
     """Merge traditional + LLM results into the full ParseResponse."""
     trad_view = _ast_to_merged(traditional)
-    llm_view  = _ast_to_merged(llm)
+    llm_view = _ast_to_merged(llm)
 
-    # Traditional wins on contact + education
-    merged_name  = traditional.name or llm.name
+    # Traditional wins on contact, LLM wins on education
+    merged_name = traditional.name or llm.name
     merged_email = traditional.email or llm.email
     merged_phone = traditional.phone or llm.phone
-    merged_edu   = traditional.education if traditional.education else llm.education
+    merged_edu = llm.education if llm.education else traditional.education
 
     # LLM always fills experience and skills
     merged_exp = llm.experience
@@ -120,7 +129,11 @@ def merge(traditional: ResumeAST, llm: ResumeAST) -> ParseResponse:
     )
 
     confidence = _compute_confidence(
-        traditional, llm, merged_edu, merged_exp, merged_skills,
+        traditional,
+        llm,
+        merged_edu,
+        merged_exp,
+        merged_skills,
     )
 
     return ParseResponse(
