@@ -625,6 +625,52 @@ class EducationParser:
 
 
 # ─────────────────────────────────────────────
+# SkillParser  (self-contained)
+# ─────────────────────────────────────────────
+class SkillParser:
+    @staticmethod
+    def _filter_lines(lines: List[Line]) -> List[Line]:
+        """Removes blank lines and common separator lines."""
+
+        def is_sep(raw):
+            s = raw.strip()
+            return len(s) > 10 and len(set(s)) <= 2 and all(c in "_-" for c in set(s))
+
+        return [l for l in lines if not l.is_blank() and not is_sep(l.raw)]
+
+    @classmethod
+    def process(cls, sections: List[Section]) -> List[str]:
+        target = [s for s in sections if s.header == "SKILLS"]
+        if not target:
+            return []
+
+        normalizer = Normalizer()
+        raw_lines = [line for s in target for line in s.lines]
+
+        clean_lines = cls._filter_lines(raw_lines)
+        clean_lines = normalizer.normalize(clean_lines)
+
+        # Regex to split by common delimiters like commas, pipes, bullets, and newlines.
+        delimiters = re.compile(r"[,|•·▪▸*;/\n]")
+        # Regex to remove category prefixes like "Languages:", "Tools:", etc.
+        category_prefix = re.compile(r"^[\w\s()\-]+:\s*")
+
+        found_skills = set()
+
+        for line in clean_lines:
+            # First, remove category prefix from the whole line
+            line_content = category_prefix.sub("", line.raw).strip()
+
+            # Now, split the remaining content by delimiters
+            parts = delimiters.split(line_content)
+            for part in parts:
+                cleaned_part = part.strip(" .,")
+                if cleaned_part and cleaned_part.lower() != "and":
+                    found_skills.add(cleaned_part)
+
+        return sorted(list(found_skills))
+
+# ─────────────────────────────────────────────
 # ResumeParser  (the public entry point)
 # ─────────────────────────────────────────────
 class ResumeParser:
@@ -666,6 +712,7 @@ class ResumeParser:
         # ── Education (traditional) ────────────────────────
         sections = HeaderBuilder().find_header(lines)
         education = EducationParser().process(sections)
+        skills = SkillParser().process(sections)
 
         return ResumeAST(
             name=name,
@@ -673,7 +720,7 @@ class ResumeParser:
             phone=phone,
             education=education,
             experience=[],  # LLM fills this
-            skills=[],  # LLM fills this
+            skills=skills,
         )
 
     # ── helpers ──────────────────────────────────────────────
