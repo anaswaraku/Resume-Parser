@@ -24,6 +24,7 @@ class ResumeAST(BaseModel):
     phone: Optional[str] = None
     education: List[Education] = []
     experience: List[Experience] = []
+    experience_raw_text: Optional[str] = None
     skills: List[str] = []
 
     @field_validator("email")

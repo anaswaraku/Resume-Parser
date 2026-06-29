@@ -243,7 +243,7 @@ class EducationParser:
     }
 
     _STOP_RE = re.compile(
-        r"\b(?:relevant\s+coursework|advisor|thesis|ranked\s+\d|gpa)\b", re.I
+        r"\b(?:relevant\s+coursework|advisor|thesis|ranked\s+\d|gpa|gate)\b", re.I
     )
 
     _PLACEHOLDER_DATE_RE = re.compile(
@@ -616,6 +616,13 @@ class EducationParser:
                 if len(parts) > 1:
                     school = ", ".join(parts[1:])
 
+        if degree:
+            # Remove "Pursuing" status and trailing punctuation
+            degree = re.sub(r"(?i)^\s*pursuing\s+", "", degree).strip().rstrip(".,")
+        if school:
+            # Remove trailing punctuation
+            school = school.strip().rstrip(".,")
+
         return Education(
             degree=degree or None,
             school=school or None,
@@ -745,21 +752,30 @@ class ResumeParser:
     def build(self, tokens: List[Token], raw_text: str = "") -> ResumeAST:
         lines = LineBuilder().build(tokens)
 
+        # ── Personal info (traditional, top-of-doc scan) ───────────────────
         # ── Personal info (traditional, top-of-doc scan) ──
         name, email, phone = self._parse_contact_info(lines, raw_text)
 
-        # ── Education (traditional) ────────────────────────
+        # ── Sections (Education, Skills, and raw Experience) ───────────────
         sections = HeaderBuilder().find_header(lines)
         education = EducationParser().process(sections)
         skills = SkillParser().process(sections)
+
+        # Extract raw text from the experience section without parsing it
+        experience_sections = [s for s in sections if s.header == "EXPERIENCES"]
+        experience_raw_text = None
+        if experience_sections:
+            all_exp_lines = [line.raw for s in experience_sections for line in s.lines]
+            experience_raw_text = "\n".join(all_exp_lines).strip() or None
 
         return ResumeAST(
             name=name,
             email=email,
             phone=phone,
             education=education,
-            experience=[],  # LLM fills this
+            experience=[],  # Always empty from traditional parser
             skills=skills,
+            experience_raw_text=experience_raw_text,
         )
 
     # ── helpers ──────────────────────────────────────────────

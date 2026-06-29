@@ -87,7 +87,16 @@ def _parse_resume(resume_text: str, use_llm: bool):
     traditional_result = ResumeParser().build(tokens=tokens, raw_text=resume_text)
 
     if use_llm:
+        # Main LLM call for non-experience fields
         llm_result = llm_parser.parse_with_llm(resume_text)
+
+        # Dedicated LLM call for experience, if raw text was found by the traditional parser
+        if traditional_result.experience_raw_text:
+            llm_experience = llm_parser.parse_experience_with_llm(
+                traditional_result.experience_raw_text
+            )
+            llm_result.experience = llm_experience
+
         return merge(traditional=traditional_result, llm=llm_result)
 
     return traditional_only(traditional=traditional_result)

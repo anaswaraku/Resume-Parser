@@ -10,7 +10,7 @@ Merge strategy:
 
 from __future__ import annotations
 
-from typing import List
+from typing import List, Optional
 from ast_models import Education, Experience, ResumeAST
 from pydantic import BaseModel
 
@@ -26,6 +26,12 @@ class MergedResult(BaseModel):
     skills: List[str] = []
 
 
+class TraditionalParserResult(MergedResult):
+    """The view of the traditional parser's output, including raw text for delegation."""
+
+    experience_raw_text: Optional[str] = None
+
+
 class ConfidenceScore(BaseModel):
     """Per-field flags showing which fields the LLM contributed."""
 
@@ -39,11 +45,12 @@ class ConfidenceScore(BaseModel):
 
 
 class ParseResponse(BaseModel):
-    traditional_parser: MergedResult
+    traditional_parser: TraditionalParserResult
     llm_parser: MergedResult | None = None
     merged_result: MergedResult
     parsing_method: str  # "hybrid" | "traditional_only"
     confidence: ConfidenceScore | None = None
+    experience_source: Optional[str] = None
 
 
 # ── Internal helpers ──────────────────────────────────────────────────────────
@@ -57,6 +64,18 @@ def _ast_to_merged(ast: ResumeAST) -> MergedResult:
         education=ast.education,
         experience=ast.experience,
         skills=ast.skills,
+    )
+
+
+def _ast_to_traditional_result(ast: ResumeAST) -> TraditionalParserResult:
+    return TraditionalParserResult(
+        name=ast.name,
+        email=ast.email,
+        phone=ast.phone,
+        education=ast.education,
+        experience=ast.experience,
+        skills=ast.skills,
+        experience_raw_text=ast.experience_raw_text,
     )
 
 
@@ -74,9 +93,12 @@ def _compute_confidence(
     # For education, if traditional was empty and we used LLM, then all are from LLM
     edu_added = len(llm.education) if not traditional.education and llm.education else 0
 
-    # Experience and skills are always from LLM in the new logic
+    # Experience is always from LLM
     exp_added = len(merged_exp)
-    skills_added = len(merged_skills)
+
+    trad_skill_set = {s.lower() for s in traditional.skills}
+    llm_skill_set = {s.lower() for s in llm.skills}
+    skills_added = len(llm_skill_set - trad_skill_set)
 
     improved_slots = sum(
         [
@@ -85,7 +107,7 @@ def _compute_confidence(
             phone_from_llm,
             bool(edu_added),
             bool(exp_added),
-            bool(skills_added),
+            skills_added > 0,
         ]
     )
     improvement_pct = round(improved_slots / 6 * 100, 1)
@@ -106,7 +128,7 @@ def _compute_confidence(
 
 def merge(traditional: ResumeAST, llm: ResumeAST) -> ParseResponse:
     """Merge traditional + LLM results into the full ParseResponse."""
-    trad_view = _ast_to_merged(traditional)
+    trad_view = _ast_to_traditional_result(traditional)
     llm_view = _ast_to_merged(llm)
 
     # Traditional wins on contact, LLM wins on education
@@ -115,9 +137,13 @@ def merge(traditional: ResumeAST, llm: ResumeAST) -> ParseResponse:
     merged_phone = traditional.phone or llm.phone
     merged_edu = llm.education if llm.education else traditional.education
 
-    # LLM always fills experience and skills
+    # LLM is the sole source for experience
     merged_exp = llm.experience
-    merged_skills = llm.skills
+
+    # Skills are combined and deduplicated, preserving case from the latter source (LLM)
+    all_skills = {skill.lower(): skill for skill in traditional.skills}
+    all_skills.update({skill.lower(): skill for skill in llm.skills})
+    merged_skills = sorted(list(all_skills.values()), key=str.lower)
 
     merged = MergedResult(
         name=merged_name,
@@ -142,16 +168,19 @@ def merge(traditional: ResumeAST, llm: ResumeAST) -> ParseResponse:
         merged_result=merged,
         parsing_method="hybrid",
         confidence=confidence,
+        experience_source="llm_only" if merged_exp else "none",
     )
 
 
 def traditional_only(traditional: ResumeAST) -> ParseResponse:
     """Wrap a traditional-only parse into the standard ParseResponse shape."""
-    view = _ast_to_merged(traditional)
+    trad_view = _ast_to_traditional_result(traditional)
+    # The merged result should not contain fields specific to the traditional parser view
+    merged_view = MergedResult.model_validate(trad_view)
     return ParseResponse(
-        traditional_parser=view,
+        traditional_parser=trad_view,
         llm_parser=None,
-        merged_result=view,
+        merged_result=merged_view,
         parsing_method="traditional_only",
         confidence=None,
     )
