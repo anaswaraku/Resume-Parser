@@ -2,6 +2,7 @@
 Traditional Parser — extracts name, email, phone, education only.
 Experience and skills are left empty for the LLM to fill.
 """
+
 from __future__ import annotations
 import re
 from typing import List, Optional, Tuple
@@ -10,9 +11,13 @@ from lexer import Token
 from ast_models import Education, ResumeAST
 from utils.key_words import SECTION_KW
 from utils.regex_patterns import (
-    DATE_RANGE_RE, YEAR_RANGE_RE,
-    DATE_RE, YEAR_RE,
-    RANGE_SEP_STR, YEAR_STR, PRESENT_STR
+    DATE_RANGE_RE,
+    YEAR_RANGE_RE,
+    DATE_RE,
+    YEAR_RE,
+    RANGE_SEP_STR,
+    YEAR_STR,
+    PRESENT_STR,
 )
 from dataclasses import dataclass, field
 from abc import ABC, abstractmethod
@@ -65,7 +70,7 @@ class LineBuilder:
         return Line(
             tokens=tokens,
             raw=" ".join(t.value for t in tokens),
-            line_number=line_number
+            line_number=line_number,
         )
 
 
@@ -74,19 +79,27 @@ class LineBuilder:
 # ─────────────────────────────────────────────
 class Normalizer:
     RULES = [
-        (re.compile(r'\bb\.?\s*tech\.?\b',       re.I), "Bachelor of Technology"),
-        (re.compile(r'\bb\.?\s*e\.?\b',          re.I), "Bachelor of Engineering"),
-        (re.compile(r'\bb\.?\s*sc\.?\b',         re.I), "Bachelor of Science"),
-        (re.compile(r'\bb\.?\s*com\.?\b',        re.I), "Bachelor of Commerce"),
-        (re.compile(r'\bb\.?\s*a\.?\b',          re.I), "Bachelor of Arts"),
-        (re.compile(r'\bm\.?\s*tech\.?\b',       re.I), "Master of Technology"),
-        (re.compile(r'\bm\.?\s*e\.?\b',          re.I), "Master of Engineering"),
-        (re.compile(r'\bm\.?\s*sc\.?\b',         re.I), "Master of Science"),
-        (re.compile(r'\bm\.?\s*b\.?\s*a\.?\b',  re.I), "Master of Business Administration"),
-        (re.compile(r'\bph\.?\s*d\.?\b',         re.I), "PhD"),
-        (re.compile(r'\bsept\b',                 re.I), "Sep"),
-        (re.compile(r'\b(present|current|now|ongoing|till\s+date|to\s+date)\b', re.I), "Present"),
-        (re.compile(r'^[\s•·▪▸\-–—*]+'),         ""),
+        (re.compile(r"\bb\.?\s*tech\.?\b", re.I), "Bachelor of Technology"),
+        (re.compile(r"\bb\.?\s*e\.?\b", re.I), "Bachelor of Engineering"),
+        (re.compile(r"\bb\.?\s*sc\.?\b", re.I), "Bachelor of Science"),
+        (re.compile(r"\bb\.?\s*com\.?\b", re.I), "Bachelor of Commerce"),
+        (re.compile(r"\bb\.?\s*a\.?\b", re.I), "Bachelor of Arts"),
+        (re.compile(r"\bm\.?\s*tech\.?\b", re.I), "Master of Technology"),
+        (re.compile(r"\bm\.?\s*e\.?\b", re.I), "Master of Engineering"),
+        (re.compile(r"\bm\.?\s*sc\.?\b", re.I), "Master of Science"),
+        (
+            re.compile(r"\bm\.?\s*b\.?\s*a\.?\b", re.I),
+            "Master of Business Administration",
+        ),
+        (re.compile(r"\bph\.?\s*d\.?\b", re.I), "PhD"),
+        (re.compile(r"\bsept\b", re.I), "Sep"),
+        (
+            re.compile(
+                r"\b(present|current|now|ongoing|till\s+date|to\s+date)\b", re.I
+            ),
+            "Present",
+        ),
+        (re.compile(r"^[\s•·▪▸\-–—*]+"), ""),
     ]
 
     def normalize(self, lines: List[Line]) -> List[Line]:
@@ -117,8 +130,9 @@ class Section:
 
 # Safe aliases — long enough not to fire on body text
 _EDUCATION_ALIASES = [
-    a.lower() for a in SECTION_KW['EDUCATION']
-    if len(a.split()) >= 2 or a in ('EDUCATION',)   # keep 'EDUCATION' but drop 'COURSE'
+    a.lower()
+    for a in SECTION_KW["EDUCATION"]
+    if len(a.split()) >= 2 or a in ("EDUCATION",)  # keep 'EDUCATION' but drop 'COURSE'
 ]
 
 # Pre-sort longest first so "EDUCATIONAL QUALIFICATIONS" beats "EDUCATION"
@@ -129,15 +143,34 @@ class HeaderBuilder:
     """Detects only EDUCATION section headers — ignores everything else."""
 
     _SECTION_KW_FLAT = [
-        (len(alias), ('COURSEWORK' if 'course' in alias.lower() else canonical), alias.lower())
+        (
+            len(alias),
+            ("COURSEWORK" if "course" in alias.lower() else canonical),
+            alias.lower(),
+        )
         for canonical, aliases in SECTION_KW.items()
         for alias in aliases
-        if len(alias.split()) >= 2 or alias in (
-            'EDUCATION', 'SUMMARY', 'SKILLS',
-            'EXPERIENCES', 'EXPERIENCE', 'WORK',
-            'PROJECTS', 'PROJECT', 'ACHIEVEMENTS', 'CERTIFICATIONS',
-            'COURSES', 'LEADERSHIP', 'ACTIVITIES', 'INTERESTS',
-            'MEMBERSHIPS', 'PUBLICATIONS', 'PATENTS', 'LANGUAGES',
+        if len(alias.split()) >= 2
+        or alias
+        in (
+            "EDUCATION",
+            "SUMMARY",
+            "SKILLS",
+            "EXPERIENCES",
+            "EXPERIENCE",
+            "WORK",
+            "PROJECTS",
+            "PROJECT",
+            "ACHIEVEMENTS",
+            "CERTIFICATIONS",
+            "COURSES",
+            "LEADERSHIP",
+            "ACTIVITIES",
+            "INTERESTS",
+            "MEMBERSHIPS",
+            "PUBLICATIONS",
+            "PATENTS",
+            "LANGUAGES",
         )
     ]
     _SECTION_KW_FLAT.sort(key=lambda x: x[0], reverse=True)
@@ -152,10 +185,10 @@ class HeaderBuilder:
             header_key = None
 
             if not normalized.is_blank() and normalized.word_count() < 8:
-                line_text = re.sub(r'[:\s]+$', '', normalized.text_lower())
+                line_text = re.sub(r"[:\s]+$", "", normalized.text_lower())
                 # longest-match wins — stops first hit
                 for _, canonical, alias in self._SECTION_KW_FLAT:
-                    if re.search(r'\b' + re.escape(alias) + r'\b', line_text):
+                    if re.search(r"\b" + re.escape(alias) + r"\b", line_text):
                         header_key = canonical
                         break
 
@@ -173,60 +206,105 @@ class HeaderBuilder:
 # ─────────────────────────────────────────────
 class EducationParser:
     _LEADING_DATE_RE = re.compile(
-        r'^\s*(?:'
-        + YEAR_STR + r'(?:\s*[-–—]+\s*|\s+to\s+)(?:' + YEAR_STR + r'|\d{2}|' + PRESENT_STR + r')'
-        + r'|' + YEAR_STR
-        + r')\b',
+        r"^\s*(?:"
+        + YEAR_STR
+        + r"(?:\s*[-–—]+\s*|\s+to\s+)(?:"
+        + YEAR_STR
+        + r"|\d{2}|"
+        + PRESENT_STR
+        + r")"
+        + r"|"
+        + YEAR_STR
+        + r")\b",
         re.IGNORECASE,
     )
 
     _DEGREE_KW = re.compile(
-        r'(?i)\b(?:bachelor|master|'
-        r'p\.?h\.?\s*d\.?|phd|diploma|'
-        r'b\.?\s*tech|b\.?\s*e\b|b\.?\s*sc|b\.?\s*com|'
-        r'b\.?\s*a\b|m\.?\s*tech|m\.?\s*e\b|m\.?\s*sc|m\.?\s*b\.?\s*a|'
-        r'b\.?s\.?|m\.?s\.?|associate|pursuing|'
-        r'class\s+(?:x|xii|10|12|10th|12th)|hsc|sslc|ssc|matriculation|high\s*school|cbse|icse)\b'
+        r"(?i)\b(?:bachelor|master|"
+        r"p\.?h\.?\s*d\.?|phd|diploma|"
+        r"b\.?\s*tech|b\.?\s*e\b|b\.?\s*sc|b\.?\s*com|"
+        r"b\.?\s*a\b|m\.?\s*tech|m\.?\s*e\b|m\.?\s*sc|m\.?\s*b\.?\s*a|"
+        r"b\.?s\.?|m\.?s\.?|associate|pursuing|"
+        r"class\s+(?:x|xii|10|12|10th|12th)|hsc|sslc|ssc|matriculation|high\s*school|cbse|icse)\b"
     )
 
     _TABLE_HEADER_WORDS = {
-        'year', 'degree', 'institute', 'college',
-        'university', 'percentage', 'cgpa', 'marks',
-        'grade', 'board', 'stream',
+        "year",
+        "degree",
+        "institute",
+        "college",
+        "university",
+        "percentage",
+        "cgpa",
+        "marks",
+        "grade",
+        "board",
+        "stream",
     }
 
     _STOP_RE = re.compile(
-        r'\b(?:relevant\s+coursework|advisor|thesis|ranked\s+\d|gpa)\b', re.I
+        r"\b(?:relevant\s+coursework|advisor|thesis|ranked\s+\d|gpa)\b", re.I
     )
 
     _PLACEHOLDER_DATE_RE = re.compile(
-        r'(?i)\b(?:jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)'
-        r'\.?\s*(?:19|20)[xX]{2}\b|\b(?:19|20)[xX]{2}\b'
+        r"(?i)\b(?:jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)"
+        r"\.?\s*(?:19|20)[xX]{2}\b|\b(?:19|20)[xX]{2}\b"
     )
 
-    _SCHOOL_KW = ['university', 'college', 'institute', 'school',
-                  'academy', 'polytechnic', 'uc', 'iit', 'nit', 'mit', 'bits',
-                  'iiit', 'vidhyalaya', 'vidyalaya', 'csu']
+    _SCHOOL_KW = [
+        "university",
+        "college",
+        "institute",
+        "school",
+        "academy",
+        "polytechnic",
+        "uc",
+        "iit",
+        "nit",
+        "mit",
+        "bits",
+        "iiit",
+        "vidhyalaya",
+        "vidyalaya",
+        "csu",
+    ]
 
     @classmethod
     def _is_table_header(cls, line: Line) -> bool:
-        words = set(re.findall(r'[a-z]+', line.raw.lower()))
-        if words and words.issubset({
-            'year', 'degree', 'institute', 'college', 'university', 'percentage',
-            'cgpa', 'marks', 'grade', 'board', 'stream', 'examination', 'obtained',
-            'passed', 'class', 'division', 'subject'
-        }):
+        words = set(re.findall(r"[a-z]+", line.raw.lower()))
+        if words and words.issubset(
+            {
+                "year",
+                "degree",
+                "institute",
+                "college",
+                "university",
+                "percentage",
+                "cgpa",
+                "marks",
+                "grade",
+                "board",
+                "stream",
+                "examination",
+                "obtained",
+                "passed",
+                "class",
+                "division",
+                "subject",
+            }
+        ):
             return True
         matches = words & cls._TABLE_HEADER_WORDS
         return len(matches) >= 3 or (
-            len(matches) >= 2 and not re.search(r'\d{4}', line.raw)
+            len(matches) >= 2 and not re.search(r"\d{4}", line.raw)
         )
 
     @staticmethod
     def _filter_lines(lines: List[Line]) -> List[Line]:
         def is_sep(raw):
             s = raw.strip()
-            return len(s) > 10 and len(set(s)) <= 2 and all(c in '_-' for c in set(s))
+            return len(s) > 10 and len(set(s)) <= 2 and all(c in "_-" for c in set(s))
+
         return [l for l in lines if not l.is_blank() and not is_sep(l.raw)]
 
     # ── entry splitting ──────────────────────────────────────
@@ -284,11 +362,11 @@ class EducationParser:
     def _split_smart(cls, lines: List[Line]) -> List[List[Line]]:
         entries: List[List[Line]] = []
         current: List[Line] = []
-        
+
         has_school = False
         has_degree = False
         has_date = False
-        
+
         for line in lines:
             if line.is_blank():
                 if current:
@@ -296,15 +374,20 @@ class EducationParser:
                     current = []
                     has_school = has_degree = has_date = False
                 continue
-                
-            line_has_school = any(re.search(r'\b' + re.escape(k) + r'\b', line.raw.lower()) for k in cls._SCHOOL_KW)
+
+            line_has_school = any(
+                re.search(r"\b" + re.escape(k) + r"\b", line.raw.lower())
+                for k in cls._SCHOOL_KW
+            )
             line_has_degree = bool(cls._DEGREE_KW.search(line.raw))
-            line_has_date = bool(DATE_RANGE_RE.search(line.raw) or YEAR_RANGE_RE.search(line.raw))
-            
+            line_has_date = bool(
+                DATE_RANGE_RE.search(line.raw) or YEAR_RANGE_RE.search(line.raw)
+            )
+
             if cls._STOP_RE.search(line.raw):
                 line_has_school = False
                 line_has_degree = False
-            
+
             should_split = False
             if current:
                 if line_has_school and has_school:
@@ -313,7 +396,7 @@ class EducationParser:
                     should_split = True
                 elif line_has_date and has_date:
                     should_split = True
-                    
+
             if should_split:
                 entries.append(current)
                 current = [line]
@@ -325,7 +408,7 @@ class EducationParser:
                 has_school = has_school or line_has_school
                 has_degree = has_degree or line_has_degree
                 has_date = has_date or line_has_date
-                
+
         if current:
             entries.append(current)
         return entries
@@ -335,16 +418,13 @@ class EducationParser:
     @classmethod
     def process(cls, sections: List[Section]) -> List[Education]:
         normalizer = Normalizer()
-        target = [s for s in sections if s.header == 'EDUCATION']
+        target = [s for s in sections if s.header == "EDUCATION"]
         if not target:
             return []
 
         # Collect raw lines — KEEP blanks, they are split signals
         raw_lines = [
-            line
-            for s in target
-            for line in s.lines
-            if not cls._is_table_header(line)
+            line for s in target for line in s.lines if not cls._is_table_header(line)
         ]
 
         # 1. Try blank-line split first (most reliable)
@@ -390,7 +470,7 @@ class EducationParser:
             raw = carry + line.raw.rstrip()
             carry = ""
             if raw.endswith("-") and not re.search(
-                r'(?i)\b(?:jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)\b.*-$', raw
+                r"(?i)\b(?:jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)\b.*-$", raw
             ):
                 carry = raw[:-1]
             else:
@@ -406,7 +486,11 @@ class EducationParser:
         if range_match:
             date_str = range_match.group(0)
             full_text = full_text.replace(date_str, "", 1)
-            parts = [p.strip() for p in re.split(RANGE_SEP_STR, date_str, flags=re.IGNORECASE) if p.strip()]
+            parts = [
+                p.strip()
+                for p in re.split(RANGE_SEP_STR, date_str, flags=re.IGNORECASE)
+                if p.strip()
+            ]
             if len(parts) >= 2:
                 start_date, end_date = parts[0], parts[-1]
             elif parts:
@@ -416,38 +500,49 @@ class EducationParser:
             if dates:
                 year_matches = []
                 for d in dates:
-                    ym = re.search(r'\b(?:19|20)(?:\d{2}|[xX]{2})\b', d)
+                    ym = re.search(r"\b(?:19|20)(?:\d{2}|[xX]{2})\b", d)
                     if ym:
                         year_matches.append((ym.group(0), d))
-                
+
                 if year_matches:
+
                     def sort_key(item):
                         y_str = item[0]
-                        if 'X' in y_str.upper():
+                        if "X" in y_str.upper():
                             return 9999
                         return int(y_str)
-                    
-                    sorted_dates = [d for y_str, d in sorted(year_matches, key=sort_key)]
+
+                    sorted_dates = [
+                        d for y_str, d in sorted(year_matches, key=sort_key)
+                    ]
                     if len(sorted_dates) > 1:
                         start_date = sorted_dates[0]
                         end_date = sorted_dates[-1]
                     else:
                         end_date = sorted_dates[0]
-                
+
                 for d in dates:
                     full_text = full_text.replace(d, "", 1)
 
         # ── Clean remaining text ─────────────────────────────
-        # Strip GPA/CPI/marks/completed noise from end of lines
-        full_text = re.compile(r'\b(?:completed|cpi|cgpa|gpa|percentage|marks|grade|class|division)\b.*$', re.I | re.M).sub('', full_text)
-        full_text = re.sub(r'(?i)\bgraduation:?\b', '', full_text)
-        full_text = re.sub(r'(?i)\b(?:page\s*)?\d+\s*of\s*\d+\b', '', full_text)
-        full_text = cls._PLACEHOLDER_DATE_RE.sub('', full_text)
-        full_text = re.sub(r'[\s,]+$', '', full_text.strip())
-        full_text = re.sub(r'^\s*[\-,•·▪▸*]\s*', '', full_text)
+        # Strip GPA/CPI/marks/completed/social noise from end of lines
+        full_text = re.compile(
+            r"\b(?:github|linkedin|portfolio|website|repository|links?)\b.*$",
+            re.I | re.M,
+        ).sub("", full_text)
+        full_text = re.compile(
+            r"\b(?:completed|cpi|cgpa|gpa|percentage|marks|grade|division)\b.*$",
+            re.I | re.M,
+        ).sub("", full_text)
+        full_text = re.sub(r"(?i)\bgraduation:?\b", "", full_text)
+        full_text = re.sub(r"(?i)\b(?:page\s*)?\d+\s*of\s*\d+\b", "", full_text)
+        full_text = cls._PLACEHOLDER_DATE_RE.sub("", full_text)
+        full_text = re.sub(r"[\s,]+$", "", full_text.strip())
+        full_text = re.sub(r"^\s*[\-,•·▪▸*]\s*", "", full_text)
 
-        text_blob = ", ".join(p.strip() for p in full_text.split('\n') if p.strip())
-        parts = [p.strip() for p in text_blob.split(',') if p.strip()]
+        text_blob = ", ".join(p.strip() for p in full_text.split("\n") if p.strip())
+        # Split by comma or vertical bar
+        parts = [p.strip() for p in re.split(r"[,|]", text_blob) if p.strip()]
 
         # Inline expansion: "BSc Computer Science, MIT" → ["BSc Computer Science", "MIT"]
         expanded = []
@@ -456,9 +551,11 @@ class EducationParser:
             skw = next((k for k in cls._SCHOOL_KW if k in part.lower()), None)
             if has_deg and skw:
                 idx = part.lower().index(skw)
-                before, after = part[:idx].strip().rstrip(','), part[idx:].strip()
-                if before: expanded.append(before)
-                if after:  expanded.append(after)
+                before, after = part[:idx].strip().rstrip(","), part[idx:].strip()
+                if before:
+                    expanded.append(before)
+                if after:
+                    expanded.append(after)
             else:
                 expanded.append(part)
         parts = [p for p in expanded if p]
@@ -467,64 +564,47 @@ class EducationParser:
         school = degree = None
         school_idx = -1
         for i, part in enumerate(parts):
-            if any(re.search(r'\b' + re.escape(k) + r'\b', part.lower()) for k in cls._SCHOOL_KW):
+            if any(
+                re.search(r"\b" + re.escape(k) + r"\b", part.lower())
+                for k in cls._SCHOOL_KW
+            ):
                 school_idx = i
                 break
 
-        degree_idx = -1
-        for i, part in enumerate(parts):
-            if cls._DEGREE_KW.search(part):
-                degree_idx = i
-                break
-
-        if school_idx >= 0:
-            # Grab school + subsequent location parts
+        if school_idx != -1:
             school_parts = [parts[school_idx]]
-            for part in parts[school_idx + 1:]:
+            # Also grab subsequent parts that look like a location
+            for part in parts[school_idx + 1 :]:
+                # Heuristic: location parts are short and don't contain digits (not a GPA) or another degree
                 if cls._DEGREE_KW.search(part):
                     break
-                if len(part.split()) < 5 and not any(c.isdigit() for c in part):
+                if len(part.split()) < 5 and not any(char.isdigit() for char in part):
                     school_parts.append(part)
                 else:
                     break
+
             school = ", ".join(school_parts)
-            
-            # Degree is the remaining parts not in school_parts
-            deg_parts = []
+
+            # Degree is everything before the school part.
+            degree_parts = parts[:school_idx]
+            degree = ", ".join(d for d in degree_parts if d).strip() or None
+
+        else:  # No school keyword found, fallback to heuristics
+            degree_idx = -1
             for i, part in enumerate(parts):
-                if i == school_idx:
-                    continue
-                if i > school_idx and part in school_parts:
-                    continue
-                deg_parts.append(part)
-            degree = ", ".join(deg_parts).strip() or None
-        else:
-            # No school keyword found, fallback to heuristics
-            if degree_idx >= 0:
+                if cls._DEGREE_KW.search(part):
+                    degree_idx = i
+                    break
+
+            if degree_idx != -1:
                 degree = parts[degree_idx]
                 other_parts = [p for i, p in enumerate(parts) if i != degree_idx]
                 school = ", ".join(other_parts).strip() or None
-            else:
-                last = parts[-1].strip() if parts else ""
-                if re.match(r'^[A-Z]{2,6}$', last):          # "MIT", "IIT", "NTU"
-                    school = last
-                    degree = ", ".join(parts[:-1]).strip() or None
-                elif (last and last[0].isupper()
-                      and not cls._DEGREE_KW.search(last)
-                      and len(last.split()) <= 4):            # "Carnegie Mellon"
-                    school = last
-                    degree = ", ".join(parts[:-1]).strip() or None
-                elif parts:
-                    degree = parts[0]
-                    school = ", ".join(parts[1:]) if len(parts) > 1 else None
-
-        # Sanity check: if degree or school is too long (often happens with 2-column resumes mixing experience text), discard it
-        if degree:
-            degree = re.sub(r'(?i)^\s*(?:pursuing|completed)\s+', '', degree).strip()
-            if len(degree.split()) > 10:
-                degree = None
-        if school and len(school.split()) > 8:
-            school = None
+            elif parts:
+                # Fallback: assume degree is first, school is second
+                degree = parts[0]
+                if len(parts) > 1:
+                    school = ", ".join(parts[1:])
 
         return Education(
             degree=degree or None,
@@ -538,21 +618,32 @@ class EducationParser:
 # ResumeParser  (the public entry point)
 # ─────────────────────────────────────────────
 class ResumeParser:
-    _TITLE_RE   = re.compile(r'(?i)\b(?:resume|curriculum\s+vitae|c\.?v\.?|bio[- ]?data)\b')
-    _ADDRESS_RE = re.compile(r'(?i)\b(?:street|st\.|blvd|avenue|ave\.|road|rd\.|apt|suite|p\.?o\.?\s*box|\d{5})\b')
+    _TITLE_RE = re.compile(
+        r"(?i)\b(?:resume|curriculum\s+vitae|c\.?v\.?|bio[- ]?data)\b"
+    )
+    _ADDRESS_RE = re.compile(
+        r"(?i)\b(?:street|st\.|blvd|avenue|ave\.|road|rd\.|apt|suite|p\.?o\.?\s*box|\d{5})\b"
+    )
 
     # All known section aliases (any canonical) — used to stop contact scan
     _ALL_ALIASES_RE = re.compile(
-        r'\b(' +
-        '|'.join(
+        r"\b("
+        + "|".join(
             re.escape(alias.lower())
             for aliases in SECTION_KW.values()
             for alias in aliases
-            if len(alias.split()) >= 2 or alias in (
-                'EDUCATION', 'SUMMARY', 'SKILLS',
-                'EXPERIENCE', 'EXPERIENCES', 'PROJECTS',
+            if len(alias.split()) >= 2
+            or alias
+            in (
+                "EDUCATION",
+                "SUMMARY",
+                "SKILLS",
+                "EXPERIENCE",
+                "EXPERIENCES",
+                "PROJECTS",
             )
-        ) + r')\b',
+        )
+        + r")\b",
         re.IGNORECASE,
     )
 
@@ -563,7 +654,7 @@ class ResumeParser:
         name, email, phone = self._parse_contact_info(lines, raw_text)
 
         # ── Education (traditional) ────────────────────────
-        sections  = HeaderBuilder().find_header(lines)
+        sections = HeaderBuilder().find_header(lines)
         education = EducationParser().process(sections)
 
         return ResumeAST(
@@ -571,8 +662,8 @@ class ResumeParser:
             email=email,
             phone=phone,
             education=education,
-            experience=[],   # LLM fills this
-            skills=[],       # LLM fills this
+            experience=[],  # LLM fills this
+            skills=[],  # LLM fills this
         )
 
     # ── helpers ──────────────────────────────────────────────
@@ -584,18 +675,24 @@ class ResumeParser:
             norm = normalizer._normalize_line(line)
             if norm.is_blank() or norm.word_count() >= 8:
                 continue
-            text = re.sub(r'[:\s]+$', '', norm.text_lower())
+            text = re.sub(r"[:\s]+$", "", norm.text_lower())
             if self._ALL_ALIASES_RE.search(text):
                 return i
         return min(25, len(lines))  # fallback: assume contact in first 25 lines
 
     def _is_name_candidate(self, line: Line) -> bool:
-        if line.is_blank():                                      return False
-        if line.has_type("EMAIL") or line.has_type("PHONE"):    return False
-        if self._TITLE_RE.search(line.raw):                     return False
-        if self._ADDRESS_RE.search(line.raw):                   return False
-        if line.has_type("DATE") or line.has_type("YEAR_RANGE"): return False
-        if not (1 <= line.word_count() <= 5):                   return False
+        if line.is_blank():
+            return False
+        if line.has_type("EMAIL") or line.has_type("PHONE"):
+            return False
+        if self._TITLE_RE.search(line.raw):
+            return False
+        if self._ADDRESS_RE.search(line.raw):
+            return False
+        if line.has_type("DATE") or line.has_type("YEAR_RANGE"):
+            return False
+        if not (1 <= line.word_count() <= 5):
+            return False
         alpha_ratio = sum(1 for c in line.raw if c.isalpha()) / max(len(line.raw), 1)
         return alpha_ratio >= 0.5
 
@@ -623,32 +720,37 @@ class ResumeParser:
         # Fallbacks for cases where lexer fails (e.g. wrapped lines or unusual characters)
         if not email or not phone:
             if raw_text:
-                orig_lines = raw_text.split('\n')
+                orig_lines = raw_text.split("\n")
                 raw_text_block = "\n".join(orig_lines[:stop])
             else:
                 raw_text_block = "\n".join(l.raw for l in contact_zone)
             if not email:
-                em_match = re.search(r'[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+', raw_text_block)
+                em_match = re.search(
+                    r"[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+", raw_text_block
+                )
                 if em_match:
                     email = em_match.group(0)
                 else:
                     # Search allowing whitespace inside email pattern to capture line-wrapped emails.
                     # Uses non-greedy domain match ending with a common TLD and a word boundary to prevent swallowing extra characters.
                     em_match2 = re.search(
-                        r'[a-zA-Z0-9._%+-]+\s*@\s*[a-zA-Z0-9.\s\-]+?\s*\.\s*(?:com|org|net|edu|gov|co|in|io|me|info|us|uk|ca|au|de|fr|[a-zA-Z]{2,4})\b',
+                        r"[a-zA-Z0-9._%+-]+\s*@\s*[a-zA-Z0-9.\s\-]+?\s*\.\s*(?:com|org|net|edu|gov|co|in|io|me|info|us|uk|ca|au|de|fr|[a-zA-Z]{2,4})\b",
                         raw_text_block,
-                        flags=re.IGNORECASE
+                        flags=re.IGNORECASE,
                     )
                     if em_match2:
-                        email = re.sub(r'\s+', '', em_match2.group(0))
+                        email = re.sub(r"\s+", "", em_match2.group(0))
 
             if not phone:
                 # Search line-by-line using local spaces to prevent merging zip codes and phones across lines
                 for line in contact_zone:
-                    ph_match = re.search(r'(?:\+?\d{1,3}[ \t.-]?)?\(?\d{2,4}\)?[ \t.-]?[\dXx]{3,10}[ \t.-]?[\dXx]{0,10}', line.raw)
+                    ph_match = re.search(
+                        r"(?:\+?\d{1,3}[ \t.-]?)?\(?\d{2,4}\)?[ \t.-]?[\dXx]{3,10}[ \t.-]?[\dXx]{0,10}",
+                        line.raw,
+                    )
                     if ph_match:
                         ph_str = ph_match.group(0).strip()
-                        if sum(c.isdigit() or c.lower() == 'x' for c in ph_str) >= 7:
+                        if sum(c.isdigit() or c.lower() == "x" for c in ph_str) >= 7:
                             phone = ph_str
                             break
 
@@ -656,8 +758,8 @@ class ResumeParser:
         for line in contact_zone[:8]:
             if self._is_name_candidate(line):
                 # Split by common separators (avoiding hyphen within words)
-                name_parts = re.split(r'[|•·;/\\–—]|\s+-\s+', line.raw)
-                name = re.sub(r'[,;]+$', '', name_parts[0]).strip()
+                name_parts = re.split(r"[|•·;/\\–—]|\s+-\s+", line.raw)
+                name = re.sub(r"[,;]+$", "", name_parts[0]).strip()
                 break
 
         return name, email, phone
@@ -668,6 +770,6 @@ class ResumeParser:
         if not phones:
             return None
         for p in phones:
-            if p.startswith('+') or re.match(r'^(?:91|1)[\s\-]', p):
+            if p.startswith("+") or re.match(r"^(?:91|1)[\s\-]", p):
                 return p
         return phones[0]
