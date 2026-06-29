@@ -23,7 +23,7 @@ from collections import defaultdict
 from utils.key_words import SECTION_KW
 from ast_models import Education, Experience, ResumeAST
 import re 
-from utils.regex_patterns import DATE_RANGE_RE, YEAR_RANGE_RE, DATE_RE, YEAR_RE, RANGE_SEP_STR
+from utils.regex_patterns import DATE_RANGE_RE, YEAR_RANGE_RE, DATE_RE, YEAR_RE, RANGE_SEP_STR, YEAR_STR, PRESENT_STR
  
 from dataclasses import dataclass, field
 from typing import List
@@ -147,14 +147,19 @@ class HeaderBuilder:
         for originial, normalized in zip(lines,normalized_lines):
             header = None 
             # Heuristic: headers are short and not blank.
-            if not normalized.is_blank() and normalized.word_count() < 6:
-                line_text = normalized.text_lower()
+            if not normalized.is_blank() and normalized.word_count() < 8:
+                # Strip trailing colons and punctuation for matching
+                line_text = re.sub(r'[:\s]+$', '', normalized.text_lower())
+                best_match_key = None
+                best_match_len = -1
                 for key, aliases in SECTION_KW.items():
-                    # Use regex to find whole-word matches for any alias.
-                    # This is more flexible than exact line matching.
-                    if any(re.search(r'\b' + re.escape(a.lower()) + r'\b', line_text) for a in aliases):
-                        header = key
-                        break
+                    for a in aliases:
+                        if re.search(r'\b' + re.escape(a.lower()) + r'\b', line_text):
+                            if len(a) > best_match_len:
+                                best_match_len = len(a)
+                                best_match_key = key
+                if best_match_key:
+                    header = best_match_key
             if header:
                 current_section = Section(header=header)
                 sections.append(current_section)
@@ -228,25 +233,68 @@ class SummaryParser(SectionParser):
 class EducationParser(SectionParser):
     SECTION_NAME = 'EDUCATION'
 
+    # Regex that recognises a leading year-range like "2010–Now" or "2007–2010"
+    _LEADING_DATE_RE = re.compile(
+        r'^\s*(?:'
+        + YEAR_STR + r'(?:\s*[-–—]+\s*|\s+to\s+)(?:' + YEAR_STR + r'|\d{2}|' + PRESENT_STR + r')'
+        + r'|' + YEAR_STR
+        + r')\b',
+        re.IGNORECASE,
+    )
+
+    # Keywords indicating degree-level information
+    _DEGREE_KW = re.compile(
+        r'(?i)\b(?:bachelor|master|'
+        r'p\.?h\.?\s*d\.?|phd|diploma|'
+        r'b\.?\s*tech|b\.?\s*e\b|b\.?\s*sc|b\.?\s*com|'
+        r'b\.?\s*a\b|m\.?\s*tech|m\.?\s*e\b|m\.?\s*sc|m\.?\s*b\.?\s*a|'
+        r'b\.?s\.?|m\.?s\.?|associate|class\s+[xiv]+|\bxii\b|\bx\b|'
+        r'pursuing)'
+    )
+
+    # Words that appear together in table-header rows — not real education data
+    _TABLE_HEADER_WORDS = {
+        'year', 'degree', 'institute', 'college', 'university',
+        'percentage', 'cgpa', 'marks', 'grade', 'board', 'stream',
+    }
+
+    # Placeholder dates like "May 20XX" or just "20XX" / "19XX"
+    _PLACEHOLDER_DATE_RE = re.compile(
+        r'(?i)\b(?:january|february|march|april|may|june|july|august|september|october|november|december'
+        r'|jan|feb|mar|apr|jun|jul|aug|sep|oct|nov|dec)'
+        r'\.?\s*(?:19|20)[xX]{2}\b'
+        r'|\b(?:19|20)[xX]{2}\b'
+    )
+
+    @classmethod
+    def _is_table_header(cls, line: Line) -> bool:
+        """True if a line looks like a table column-header row (not real edu data)."""
+        words = set(re.findall(r'[a-z]+', line.raw.lower()))
+        matches = words & cls._TABLE_HEADER_WORDS
+        # Flag if >=3 header words present, or 2+ and the line has no digit run (no year)
+        return len(matches) >= 3 or (len(matches) >= 2 and not re.search(r'\d{4}', line.raw))
+
     @classmethod
     def process(cls, sections: List[Section]) -> List[Education]:
         normalizer = Normalizer()
         raw_lines = [line for section in sections for line in section.lines]
+        # Remove table-header rows before anything else
+        raw_lines = [l for l in raw_lines if not cls._is_table_header(l)]
         filtered_lines = SectionParser._filter_lines(raw_lines)
         all_lines = normalizer.normalize(filtered_lines)
 
-        # Group lines into entries based on blank lines
-        entries_lines: List[List[Line]] = []
-        current_entry: List[Line] = []
-        for line in all_lines:
-            if line.is_blank():
-                if current_entry:
-                    entries_lines.append(current_entry)
-                current_entry = []
-            else:
-                current_entry.append(line)
-        if current_entry:
-            entries_lines.append(current_entry)
+        # --- Split lines into entry groups ---
+        entries_lines = cls._split_by_blanks(all_lines)
+        if len(entries_lines) <= 1 and all_lines:
+            date_split = cls._split_by_leading_dates(all_lines)
+            if len(date_split) > len(entries_lines):
+                entries_lines = date_split
+
+        # If still one big group, try degree-keyword splitting
+        if len(entries_lines) <= 1 and all_lines:
+            degree_split = cls._split_by_degree_keywords(all_lines)
+            if len(degree_split) > len(entries_lines):
+                entries_lines = degree_split
 
         # Parse each entry
         education_entries = []
@@ -258,17 +306,89 @@ class EducationParser(SectionParser):
         return education_entries
 
     @classmethod
+    def _split_by_blanks(cls, lines: List[Line]) -> List[List[Line]]:
+        """Group lines into entries based on blank lines."""
+        entries: List[List[Line]] = []
+        current: List[Line] = []
+        for line in lines:
+            if line.is_blank():
+                if current:
+                    entries.append(current)
+                current = []
+            else:
+                current.append(line)
+        if current:
+            entries.append(current)
+        return entries
+
+    @classmethod
+    def _split_by_leading_dates(cls, lines: List[Line]) -> List[List[Line]]:
+        """Split entries when a line starts with a year or year-range (e.g. '2010–Now')."""
+        entries: List[List[Line]] = []
+        current: List[Line] = []
+        for line in lines:
+            if line.is_blank():
+                continue
+            if cls._LEADING_DATE_RE.match(line.raw.strip()) and current:
+                entries.append(current)
+                current = []
+            current.append(line)
+        if current:
+            entries.append(current)
+        return entries
+
+    @classmethod
+    def _split_by_degree_keywords(cls, lines: List[Line]) -> List[List[Line]]:
+        """Split entries when a line contains a degree keyword (Bachelor, Master, etc.)."""
+        entries: List[List[Line]] = []
+        current: List[Line] = []
+        for line in lines:
+            if line.is_blank():
+                continue
+            if cls._DEGREE_KW.search(line.raw) and current:
+                entries.append(current)
+                current = []
+            current.append(line)
+        if current:
+            entries.append(current)
+        return entries
+
+    @classmethod
     def _parse_entry(cls, entry_lines: List[Line]) -> Education:
-        # Pre-filter lines to remove noise and stop at irrelevant sections
+        # Pre-filter lines to remove noise and stop at irrelevant metadata
         filtered_lines = []
-        stop_keywords = ['relevant coursework', 'gpa']
+        stop_keywords = ['relevant coursework', 'gpa', 'advisor:', 'thesis:', 'ranked']
         for line in entry_lines:
             raw_lower = line.raw.lower()
             if any(kw in raw_lower for kw in stop_keywords):
                 break
             filtered_lines.append(line)
 
-        full_text = " \n ".join(line.raw for line in filtered_lines)
+        if not filtered_lines:
+            filtered_lines = entry_lines[:2]  # fallback: use first two lines
+
+        # Fix 5: join hyphen-terminated lines directly (PDF line-wrap artifact)
+        joined_lines: List[str] = []
+        carry = ""
+        for line in filtered_lines:
+            raw = line.raw.rstrip()
+            if carry:
+                raw = carry + raw
+                carry = ""
+            if raw.endswith("-") and not re.search(
+                r'(?i)\b(?:' + '|'.join([
+                    'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+                    'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
+                ]) + r')\b.*-$', raw
+            ):
+                # trailing hyphen = word-wrap; carry forward without the hyphen
+                carry = raw[:-1]
+            else:
+                joined_lines.append(raw)
+        if carry:
+            joined_lines.append(carry)
+
+        full_text = " \n ".join(joined_lines)
 
         start_date, end_date = None, None
 
@@ -278,9 +398,13 @@ class EducationParser(SectionParser):
             date_str = range_match.group(0)
             full_text = full_text.replace(date_str, "")
             parts = re.split(RANGE_SEP_STR, date_str, flags=re.IGNORECASE)
+            # Filter out empty parts from the split
+            parts = [p.strip() for p in parts if p.strip()]
             if len(parts) >= 2:
                 start_date = parts[0].strip()
                 end_date = parts[-1].strip()
+            elif len(parts) == 1:
+                end_date = parts[0].strip()
         else:
             dates = DATE_RE.findall(full_text) + YEAR_RE.findall(full_text)
             if dates:
@@ -295,9 +419,13 @@ class EducationParser(SectionParser):
         # 2. Parse degree and school from remaining text
         # Remove common noise words before splitting
         full_text = re.sub(r'(?i)\bgraduation:?\b', '', full_text)
+        # Remove page markers like "Page 2of 3" / "1of 3"
+        full_text = re.sub(r'(?i)\b(?:page\s*)?\d+\s*of\s*\d+\b', '', full_text)
+        # Fix 6: Strip placeholder dates like "May 20XX" or "20XX"
+        full_text = cls._PLACEHOLDER_DATE_RE.sub('', full_text)
         clean_text = re.sub(r'[\s,]+$', '', full_text.strip())
         clean_text = re.sub(r'^\s*[\-,•·▪▸*]\s*', '', clean_text)
-        
+
         text_blob = ", ".join(p.strip() for p in clean_text.split('\n') if p.strip())
         comma_parts = [p.strip() for p in text_blob.split(',') if p.strip()]
 
@@ -306,30 +434,75 @@ class EducationParser(SectionParser):
         degree = None
         school = None
 
+        # Extended school keywords
+        school_keywords = ['university', 'college', 'institute', 'school', 'academy', 'polytechnic']
+
+        # Fix 4: If a single comma-part contains BOTH a degree keyword AND a school keyword,
+        # split that part inline at the school keyword boundary.
+        expanded_parts: List[str] = []
+        for part in comma_parts:
+            part_lower = part.lower()
+            has_degree = bool(cls._DEGREE_KW.search(part))
+            school_kw_match = next((kw for kw in school_keywords if kw in part_lower), None)
+            if has_degree and school_kw_match:
+                # Split at the first occurrence of the school keyword
+                idx = part_lower.index(school_kw_match)
+                before = part[:idx].strip().rstrip(',').strip()
+                after = part[idx:].strip()
+                if before:
+                    expanded_parts.append(before)
+                if after:
+                    expanded_parts.append(after)
+            else:
+                expanded_parts.append(part)
+        comma_parts = [p for p in expanded_parts if p]
+
         for i, part in enumerate(comma_parts):
-            if any(kw in part.lower() for kw in ['university', 'college', 'institute', 'school']):
+            if any(kw in part.lower() for kw in school_keywords):
                 school_part = part
                 school_index = i
                 break
-        
+
         if school_part:
             school_parts = [school_part]
             # Also grab subsequent parts that look like a location
             for part in comma_parts[school_index + 1:]:
                 # Heuristic: location parts are short and don't contain digits (not a GPA)
-                if len(part.split()) < 4 and not any(char.isdigit() for char in part):
+                if len(part.split()) < 5 and not any(char.isdigit() for char in part):
                     school_parts.append(part)
                 else:
                     break  # Stop if we hit something long or with numbers
-            
+
             school = ", ".join(school_parts)
             degree_parts = comma_parts[:school_index]
             degree = ", ".join(d for d in degree_parts if d).strip()
         elif comma_parts:
-            # Fallback: assume degree is first, school is second
-            degree = comma_parts[0]
-            if len(comma_parts) > 1:
-                school = comma_parts[1]
+            # Fallback: use degree keyword detection to separate degree from school/field
+            degree_idx = -1
+            for i, part in enumerate(comma_parts):
+                if cls._DEGREE_KW.search(part):
+                    degree_idx = i
+                    break
+
+            if degree_idx >= 0:
+                degree = comma_parts[degree_idx]
+                # Remaining parts after degree are school/field
+                remaining = [p for j, p in enumerate(comma_parts) if j != degree_idx]
+                if remaining:
+                    school = ", ".join(remaining)
+            else:
+                # Last resort: first part is degree, second is school
+                degree = comma_parts[0]
+                if len(comma_parts) > 1:
+                    school = ", ".join(comma_parts[1:])
+
+        # Clean up empty strings
+        if degree and not degree.strip():
+            degree = None
+        if school and not school.strip():
+            school = None
+        if end_date is not None and not end_date.strip():
+            end_date = None
 
         return Education(degree=degree, school=school, start_date=start_date, end_date=end_date)
 
@@ -450,6 +623,15 @@ class ExperienceParser(SectionParser):
         return Experience(company=company, role=role, start_date=start_date, end_date=end_date, description=description if description else None)
 
 class ResumeParser:
+    # Common document title patterns to skip when looking for names
+    _TITLE_RE = re.compile(
+        r'(?i)\b(?:resume|curriculum\s+vitae|c\.?v\.?|bio[- ]?data)\b'
+    )
+    # Address-like lines: contain digits + typical location words
+    _ADDRESS_RE = re.compile(
+        r'(?i)\b(?:street|st\.|blvd|avenue|ave\.|road|rd\.|apt|suite|p\.?o\.?\s*box|\d{5})\b'
+    )
+
     def build(self, tokens:List[Token]):
         lines = LineBuilder().build(tokens=tokens)
         
@@ -477,11 +659,47 @@ class ResumeParser:
         }
         return ResumeAST(**final_result)
 
+    def _is_section_header(self, line_text: str) -> bool:
+        """Check if a line matches any known section header keyword."""
+        stripped = re.sub(r'[:\s]+$', '', line_text.lower())
+        for _key, aliases in SECTION_KW.items():
+            if any(re.search(r'\b' + re.escape(a.lower()) + r'\b', stripped) for a in aliases):
+                return True
+        return False
+
+    def _is_name_candidate(self, line: Line) -> bool:
+        """Return True if the line looks like a person's name."""
+        if line.is_blank():
+            return False
+        # Skip lines with contact tokens
+        if line.has_type("EMAIL") or line.has_type("PHONE") or line.has_type("URL"):
+            return False
+        # Skip lines that are document titles
+        if self._TITLE_RE.search(line.raw):
+            return False
+        # Skip section headers
+        if self._is_section_header(line.raw):
+            return False
+        # Skip address-like lines
+        if self._ADDRESS_RE.search(line.raw):
+            return False
+        # Skip lines with dates
+        if line.has_type("DATE") or line.has_type("DATE_RANGE") or line.has_type("YEAR_RANGE"):
+            return False
+        # A name is typically 1-5 words (allowing for suffixes like ".K.B")
+        if not (1 <= line.word_count() <= 5):
+            return False
+        # Name lines should be mostly alpha characters (allow dots, hyphens, spaces)
+        alpha_ratio = sum(1 for c in line.raw if c.isalpha()) / max(len(line.raw), 1)
+        if alpha_ratio < 0.5:
+            return False
+        return True
+
     def _parse_contact_info(self, lines: List[Line]) -> Tuple[Optional[str], Optional[str], Optional[str]]:
         email, phone, name = None, None, None
         
-        # Limit search to the top of the resume (first 10 lines)
-        contact_lines = lines[:10]
+        # Search the top of the resume (first 15 lines) for email and phone
+        contact_lines = lines[:15]
 
         for line in contact_lines:
             if line.is_blank():
@@ -494,17 +712,44 @@ class ResumeParser:
                     email = email_token
             
             if not phone:
-                phone_token = next((t.value for t in line.tokens if t.type == "PHONE"), None)
+                phone_token = self._pick_best_phone(line)
                 if phone_token:
                     phone = phone_token
 
+        # Fix 1: Fallback — scan only lines 15-25 (not the whole doc) to avoid footer emails
+        if not email or not phone:
+            for line in lines[15:25]:
+                if line.is_blank():
+                    continue
+                if not email:
+                    email_token = next((t.value for t in line.tokens if t.type == "EMAIL"), None)
+                    if email_token:
+                        email = email_token
+                if not phone:
+                    phone_token = self._pick_best_phone(line)
+                    if phone_token:
+                        phone = phone_token
+                if email and phone:
+                    break
+
         # Heuristic for name: Find the first plausible line at the top.
-        # Usually the first non-blank line, short, and not contact info or a header.
-        for line in lines[:5]:
-            if not line.is_blank() and not line.has_type("EMAIL") and not line.has_type("PHONE") and not line.has_type("URL"):
-                # A name is typically 2-4 words.
-                if 1 <= line.word_count() <= 4:
-                    name = line.raw
-                    break # Found a plausible name, so we stop.
+        # Check first 8 lines, skipping titles, headers, contact-only lines, addresses.
+        for line in lines[:8]:
+            if self._is_name_candidate(line):
+                # Clean up the raw text: remove trailing commas and extra whitespace
+                name = re.sub(r'[,;]+$', '', line.raw).strip()
+                break
 
         return name, email, phone
+
+    @staticmethod
+    def _pick_best_phone(line: Line) -> Optional[str]:
+        """Fix 2: Among all PHONE tokens on a line, prefer one with a country-code prefix."""
+        phone_tokens = [t.value for t in line.tokens if t.type == "PHONE"]
+        if not phone_tokens:
+            return None
+        # Prefer tokens that start with '+' or look like international numbers (91..., 1...)
+        for tok in phone_tokens:
+            if tok.startswith('+') or re.match(r'^(?:91|1)[\s\-]', tok):
+                return tok
+        return phone_tokens[0]  # fallback: first token found

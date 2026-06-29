@@ -10,6 +10,7 @@ SECTION_KW = {
     ],
     'EDUCATION': [
         'ACADEMIC BACKGROUND',
+        'ACADEMIC CREDENTIALS',
         'ACADEMIC DEGREES',
         'ACADEMIC DETAILS',
         'ACADEMIC HISTORY',
