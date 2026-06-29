@@ -12,40 +12,52 @@
       }
     ],
     "experience": [],
-    "skills": []
+    "skills": [
+      "Advanced PASCAL",
+      "C",
+      "Icon",
+      "Ingres database",
+      "LISP",
+      "Modula-II",
+      "UNIX and VAX",
+      "VMS systems",
+      "and Equal preprocessor",
+      "and FORTRAN",
+      "dBASE III"
+    ]
   },
   "llm_parser": {
-    "name": "Rosa Gutierrez",
-    "email": null,
+    "name": "ROSA GUTIERREZ",
+    "email": "sicc@sfsu.edu",
     "phone": null,
     "education": [
       {
-        "degree": "Bachelor of Science",
+        "degree": "Bachelor of Science, Computer Science",
         "school": "CSU East Bay",
-        "start_date": "20XX-05",
+        "start_date": "20XX",
         "end_date": null
       }
     ],
     "experience": [
       {
-        "company": "NASA/Marshall Space Flight Center",
+        "company": "NASA/Marshall Space Flight Center, Alabama",
         "role": "Computer Programmer",
-        "start_date": "20XX-06",
-        "end_date": "20XX-09",
-        "description": "Learned VAX/VMS system and Machine and Assembly Language, Developed understanding of Ingres database and Equal preprocessor, Revised existing program to maintain flight schedules by integrating with Ingres database, Introduced new program to find a peak frequency of input using the Marinco array processing board and Vectrix graphics monitor"
+        "start_date": "June 20XX",
+        "end_date": "September 20XX",
+        "description": "• Learned VAX/VMS system and Machine and Assembly Language\n• Developed understanding of Ingres database and Equal preprocessor\n• Revised existing program to maintain flight schedules by integrating with Ingres database\n• Introduced new program to find a peak frequency of input using the Marinco array processing board and Vectrix graphics monitor"
       },
       {
         "company": "Tutor and Grader, CSU East Bay",
         "role": "Tutor and Grader",
-        "start_date": "20XX-09",
+        "start_date": "September 20XX",
         "end_date": null,
         "description": null
       },
       {
-        "company": "Mathematics Intern, CSU East Bay Learning Center",
+        "company": "Mathematics Intern, CSU East Bay Learning Center, Hayward, CA",
         "role": "Mathematics Intern",
-        "start_date": "20XX-04",
-        "end_date": "20XX-06",
+        "start_date": "April 20XX",
+        "end_date": "June 20XX",
         "description": null
       }
     ],
@@ -66,36 +78,36 @@
   },
   "merged_result": {
     "name": "ROSA GUTIERREZ",
-    "email": null,
+    "email": "sicc@sfsu.edu",
     "phone": null,
     "education": [
       {
         "degree": "Bachelor of Science, Computer Science",
         "school": "CSU East Bay",
-        "start_date": "May 20XX",
-        "end_date": "20XX"
+        "start_date": "20XX",
+        "end_date": null
       }
     ],
     "experience": [
       {
-        "company": "NASA/Marshall Space Flight Center",
+        "company": "NASA/Marshall Space Flight Center, Alabama",
         "role": "Computer Programmer",
-        "start_date": "20XX-06",
-        "end_date": "20XX-09",
-        "description": "Learned VAX/VMS system and Machine and Assembly Language, Developed understanding of Ingres database and Equal preprocessor, Revised existing program to maintain flight schedules by integrating with Ingres database, Introduced new program to find a peak frequency of input using the Marinco array processing board and Vectrix graphics monitor"
+        "start_date": "June 20XX",
+        "end_date": "September 20XX",
+        "description": "• Learned VAX/VMS system and Machine and Assembly Language\n• Developed understanding of Ingres database and Equal preprocessor\n• Revised existing program to maintain flight schedules by integrating with Ingres database\n• Introduced new program to find a peak frequency of input using the Marinco array processing board and Vectrix graphics monitor"
       },
       {
         "company": "Tutor and Grader, CSU East Bay",
         "role": "Tutor and Grader",
-        "start_date": "20XX-09",
+        "start_date": "September 20XX",
         "end_date": null,
         "description": null
       },
       {
-        "company": "Mathematics Intern, CSU East Bay Learning Center",
+        "company": "Mathematics Intern, CSU East Bay Learning Center, Hayward, CA",
         "role": "Mathematics Intern",
-        "start_date": "20XX-04",
-        "end_date": "20XX-06",
+        "start_date": "April 20XX",
+        "end_date": "June 20XX",
         "description": null
       }
     ],
@@ -117,11 +129,11 @@
   "parsing_method": "hybrid",
   "confidence": {
     "name_from_llm": false,
-    "email_from_llm": false,
+    "email_from_llm": true,
     "phone_from_llm": false,
     "education_added_by_llm": 0,
     "experience_added_by_llm": 3,
     "skills_added_by_llm": 12,
-    "improvement_pct": 33.3
+    "improvement_pct": 50
   }
 }

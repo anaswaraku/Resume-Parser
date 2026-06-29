@@ -1,117 +1,197 @@
 {
   "traditional_parser": {
-    "name": "ROSA GUTIERREZ",
-    "email": null,
-    "phone": null,
+    "name": "AJITHA SHENOY .K.B",
+    "email": "ajithshenoy2003@yahoo.com",
+    "phone": "9839791934",
     "education": [
       {
-        "degree": "Bachelor of Science, Computer Science",
-        "school": "CSU East Bay",
-        "start_date": "May 20XX",
-        "end_date": "20XX"
+        "degree": "Pursuing P.hD in the Department of Computer Science and Engineering, GATE –  Qualified All India 156thRank",
+        "school": "IIT, Kanpur.",
+        "start_date": null,
+        "end_date": "2000"
+      },
+      {
+        "degree": "Bachelor of Science Calicut",
+        "school": "University  89 .8 First with, Mathematics Distinction, First in the",
+        "start_date": null,
+        "end_date": "1997"
+      },
+      {
+        "degree": "Master of Science First with",
+        "school": "Mathematics Kannur University  76 .27 Distinction, First in the",
+        "start_date": null,
+        "end_date": "1999"
+      },
+      {
+        "degree": "Master of Technology, Computer and, Science 10",
+        "school": "Information Cochin University  8.11 out Distinction",
+        "start_date": null,
+        "end_date": "2003"
       }
     ],
     "experience": [],
-    "skills": []
+    "skills": [
+      "Advanced Computer Networks",
+      "Algorithms",
+      "Back end ORACLE 9i",
+      "Bio-",
+      "C",
+      "Computational Geometry",
+      "Data Structures",
+      "Design and Analysis of Algorithm",
+      "Graph Algorithms",
+      "JAVA",
+      "Linux",
+      "MFC",
+      "Mathematics",
+      "Multimedia Communication",
+      "Object Oriented Programming Using C",
+      "Object Oriented Technology",
+      "Operating System Windows",
+      "Page 2of 3",
+      "Programming VC",
+      "Randomized Algorithms",
+      "System Simulation and Modeling",
+      "VB.Net",
+      "VC",
+      "VMware",
+      "Visual",
+      "and Mathematics",
+      "informatics"
+    ]
   },
   "llm_parser": {
-    "name": "Rosa Gutierrez",
-    "email": null,
-    "phone": null,
+    "name": "AJITHA SHENOY .K.B",
+    "email": "ajithshenoy2003@yahoo.com or ajith@cse.iitk.ac.in or ajith@iitk.ac.in",
+    "phone": "91-9305326504, 91 –9839791934",
     "education": [
       {
-        "degree": "Bachelor of Science",
-        "school": "CSU East Bay",
-        "start_date": "20XX-05",
-        "end_date": null
+        "degree": "PhD",
+        "school": "IIT, KANPUR",
+        "start_date": "null",
+        "end_date": "null"
+      },
+      {
+        "degree": "M.Tech",
+        "school": "Cochin University",
+        "start_date": "2003",
+        "end_date": "null"
+      },
+      {
+        "degree": "M.Sc",
+        "school": "Kannur University",
+        "start_date": "1999",
+        "end_date": "null"
+      },
+      {
+        "degree": "B.Sc",
+        "school": "Calicut University",
+        "start_date": "1997",
+        "end_date": "null"
       }
     ],
     "experience": [
       {
-        "company": "NASA/Marshall Space Flight Center",
-        "role": "Computer Programmer",
-        "start_date": "20XX-06",
-        "end_date": "20XX-09",
-        "description": "Learned VAX/VMS system and Machine and Assembly Language, Developed understanding of Ingres database and Equal preprocessor, Revised existing program to maintain flight schedules by integrating with Ingres database, Introduced new program to find a peak frequency of input using the Marinco array processing board and Vectrix graphics monitor"
+        "company": "Manipal Institute of Technology, MANIPAL",
+        "role": "Lecturer",
+        "start_date": "2003-09-04",
+        "end_date": "2007-12-19",
+        "description": " Pursuing research in the Department of Computer Science and Engineering at IIT, Kanpur.\n\n Worked as a Lecturer in the Department of Information & Communication Technology at Manipal Institute of Technology, MANIPAL from 04-09-2003 to 19-12-2007 ( 4 years 3 months).\n\n 1.5 years of work experience as a Lecturer in the Department of Mathematics at Government College, Kasaragod –671 121."
       },
       {
-        "company": "Tutor and Grader, CSU East Bay",
-        "role": "Tutor and Grader",
-        "start_date": "20XX-09",
-        "end_date": null,
-        "description": null
-      },
-      {
-        "company": "Mathematics Intern, CSU East Bay Learning Center",
-        "role": "Mathematics Intern",
-        "start_date": "20XX-04",
-        "end_date": "20XX-06",
-        "description": null
+        "company": "Government College, Kasaragod",
+        "role": "Lecturer",
+        "start_date": "null",
+        "end_date": "null",
+        "description": "1.5 years of work experience as a Lecturer in the Department of Mathematics at Government College, Kasaragod –671 121."
       }
     ],
     "skills": [
-      "Advanced PASCAL",
-      "Modula-II",
       "C",
-      "Icon",
-      "LISP",
-      "FORTRAN",
-      "Machine and Assembly Language for the PDP – 11 and M68000",
-      "Ingres database",
-      "dBASE III",
-      "Equal preprocessor",
-      "UNIX",
-      "VAX/VMS systems"
+      "C++",
+      "MFC",
+      "VC++",
+      "VB.Net",
+      "JAVA",
+      "ORACLE 9i",
+      "Windows",
+      "Linux",
+      "VMware",
+      "Algorithms",
+      "Graph Algorithms",
+      "Randomized Algorithms",
+      "Bio-informatics",
+      "Data Structures",
+      "Object Oriented Technology",
+      "Computational Geometry",
+      "Mathematics"
     ]
   },
   "merged_result": {
-    "name": "ROSA GUTIERREZ",
-    "email": null,
-    "phone": null,
+    "name": "AJITHA SHENOY .K.B",
+    "email": "ajithshenoy2003@yahoo.com",
+    "phone": "9839791934",
     "education": [
       {
-        "degree": "Bachelor of Science, Computer Science",
-        "school": "CSU East Bay",
-        "start_date": "May 20XX",
-        "end_date": "20XX"
+        "degree": "PhD",
+        "school": "IIT, KANPUR",
+        "start_date": "null",
+        "end_date": "null"
+      },
+      {
+        "degree": "M.Tech",
+        "school": "Cochin University",
+        "start_date": "2003",
+        "end_date": "null"
+      },
+      {
+        "degree": "M.Sc",
+        "school": "Kannur University",
+        "start_date": "1999",
+        "end_date": "null"
+      },
+      {
+        "degree": "B.Sc",
+        "school": "Calicut University",
+        "start_date": "1997",
+        "end_date": "null"
       }
     ],
     "experience": [
       {
-        "company": "NASA/Marshall Space Flight Center",
-        "role": "Computer Programmer",
-        "start_date": "20XX-06",
-        "end_date": "20XX-09",
-        "description": "Learned VAX/VMS system and Machine and Assembly Language, Developed understanding of Ingres database and Equal preprocessor, Revised existing program to maintain flight schedules by integrating with Ingres database, Introduced new program to find a peak frequency of input using the Marinco array processing board and Vectrix graphics monitor"
+        "company": "Manipal Institute of Technology, MANIPAL",
+        "role": "Lecturer",
+        "start_date": "2003-09-04",
+        "end_date": "2007-12-19",
+        "description": " Pursuing research in the Department of Computer Science and Engineering at IIT, Kanpur.\n\n Worked as a Lecturer in the Department of Information & Communication Technology at Manipal Institute of Technology, MANIPAL from 04-09-2003 to 19-12-2007 ( 4 years 3 months).\n\n 1.5 years of work experience as a Lecturer in the Department of Mathematics at Government College, Kasaragod –671 121."
       },
       {
-        "company": "Tutor and Grader, CSU East Bay",
-        "role": "Tutor and Grader",
-        "start_date": "20XX-09",
-        "end_date": null,
-        "description": null
-      },
-      {
-        "company": "Mathematics Intern, CSU East Bay Learning Center",
-        "role": "Mathematics Intern",
-        "start_date": "20XX-04",
-        "end_date": "20XX-06",
-        "description": null
+        "company": "Government College, Kasaragod",
+        "role": "Lecturer",
+        "start_date": "null",
+        "end_date": "null",
+        "description": "1.5 years of work experience as a Lecturer in the Department of Mathematics at Government College, Kasaragod –671 121."
       }
     ],
     "skills": [
-      "Advanced PASCAL",
-      "Modula-II",
       "C",
-      "Icon",
-      "LISP",
-      "FORTRAN",
-      "Machine and Assembly Language for the PDP – 11 and M68000",
-      "Ingres database",
-      "dBASE III",
-      "Equal preprocessor",
-      "UNIX",
-      "VAX/VMS systems"
+      "C++",
+      "MFC",
+      "VC++",
+      "VB.Net",
+      "JAVA",
+      "ORACLE 9i",
+      "Windows",
+      "Linux",
+      "VMware",
+      "Algorithms",
+      "Graph Algorithms",
+      "Randomized Algorithms",
+      "Bio-informatics",
+      "Data Structures",
+      "Object Oriented Technology",
+      "Computational Geometry",
+      "Mathematics"
     ]
   },
   "parsing_method": "hybrid",
@@ -120,8 +200,8 @@
     "email_from_llm": false,
     "phone_from_llm": false,
     "education_added_by_llm": 0,
-    "experience_added_by_llm": 3,
-    "skills_added_by_llm": 12,
+    "experience_added_by_llm": 2,
+    "skills_added_by_llm": 18,
     "improvement_pct": 33.3
   }
 }

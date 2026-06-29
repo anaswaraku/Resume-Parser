@@ -12,7 +12,34 @@
       }
     ],
     "experience": [],
-    "skills": []
+    "skills": [
+      "AI Architecture",
+      "AWS SageMaker",
+      "Airflow",
+      "Amazon Bedrock",
+      "Azure ML",
+      "Azure OpenAI",
+      "Deep Learning",
+      "Docker",
+      "FastAPI",
+      "GCP Vertex AI",
+      "GitHub Actions",
+      "Hugging Face",
+      "Kubeflow",
+      "Kubernetes",
+      "LLMs",
+      "LangChain",
+      "LlamaIndex",
+      "MLflow",
+      "NLP",
+      "PyTorch",
+      "Python",
+      "RAG",
+      "REST APIs",
+      "Solution Design",
+      "TensorFlow",
+      "Terraform"
+    ]
   },
   "llm_parser": {
     "name": "Aarav Menon",
@@ -32,21 +59,21 @@
         "role": "Senior AI Architect",
         "start_date": "Jan 2022",
         "end_date": null,
-        "description": "Designed enterprise AI architectures and end-to-end AI pipelines covering ingestion, training, inference, monitoring, and retraining. Built production NLP and Generative AI solutions using Python, FastAPI, Transformers, and RAG. Integrated AI services with enterprise APIs and cloud platforms. Implemented MLOps with MLflow, Kubeflow, Docker, Kubernetes, CI/CD, monitoring, governance, and drift detection. Led a team of 15 AI engineers and mentored teams on AI architecture and MLOps best practices."
+        "description": "• Designed enterprise AI architectures and end-to-end AI pipelines covering ingestion,\n• Built production NLP and Generative AI solutions using Python, FastAPI, Transformers,\n• Integrated AI services with enterprise APIs and cloud platforms.\n• Implemented MLOps with MLflow, Kubeflow, Docker, Kubernetes, CI/CD, monitoring,\n• Led a team of 15 AI engineers and mentored teams on AI architecture and MLOps\nbest practices."
       },
       {
         "company": "NextWave Digital Solutions",
         "role": "AI Technical Lead",
         "start_date": "Jul 2018",
         "end_date": "Dec 2021",
-        "description": "Led NLP modernization projects, automated ML pipelines using Airflow, deployed scalable AI APIs, and implemented MLflow-based experiment tracking."
+        "description": "Led NLP modernization projects, automated ML pipelines using Airflow, deployed\nscalable AI APIs, and implemented MLflow-based experiment tracking."
       },
       {
         "company": "DataVision Analytics",
         "role": "Machine Learning Engineer",
         "start_date": "Jun 2015",
         "end_date": "Jun 2018",
-        "description": "Developed predictive ML models, deep learning solutions, recommendation systems, and optimized model inference performance."
+        "description": "Developed predictive ML models, deep learning solutions, recommendation systems,\nand optimized model inference performance."
       }
     ],
     "skills": [
@@ -84,8 +111,8 @@
     "phone": null,
     "education": [
       {
-        "degree": "Master of Technology., Computer Science Engineering Fictional",
-        "school": "Indian Institute of Technology, Fictional",
+        "degree": "M.Tech., Computer Science & Engineering",
+        "school": "Indian Institute of Technology (Fictional)",
         "start_date": null,
         "end_date": null
       }
@@ -96,21 +123,21 @@
         "role": "Senior AI Architect",
         "start_date": "Jan 2022",
         "end_date": null,
-        "description": "Designed enterprise AI architectures and end-to-end AI pipelines covering ingestion, training, inference, monitoring, and retraining. Built production NLP and Generative AI solutions using Python, FastAPI, Transformers, and RAG. Integrated AI services with enterprise APIs and cloud platforms. Implemented MLOps with MLflow, Kubeflow, Docker, Kubernetes, CI/CD, monitoring, governance, and drift detection. Led a team of 15 AI engineers and mentored teams on AI architecture and MLOps best practices."
+        "description": "• Designed enterprise AI architectures and end-to-end AI pipelines covering ingestion,\n• Built production NLP and Generative AI solutions using Python, FastAPI, Transformers,\n• Integrated AI services with enterprise APIs and cloud platforms.\n• Implemented MLOps with MLflow, Kubeflow, Docker, Kubernetes, CI/CD, monitoring,\n• Led a team of 15 AI engineers and mentored teams on AI architecture and MLOps\nbest practices."
       },
       {
         "company": "NextWave Digital Solutions",
         "role": "AI Technical Lead",
         "start_date": "Jul 2018",
         "end_date": "Dec 2021",
-        "description": "Led NLP modernization projects, automated ML pipelines using Airflow, deployed scalable AI APIs, and implemented MLflow-based experiment tracking."
+        "description": "Led NLP modernization projects, automated ML pipelines using Airflow, deployed\nscalable AI APIs, and implemented MLflow-based experiment tracking."
       },
       {
         "company": "DataVision Analytics",
         "role": "Machine Learning Engineer",
         "start_date": "Jun 2015",
         "end_date": "Jun 2018",
-        "description": "Developed predictive ML models, deep learning solutions, recommendation systems, and optimized model inference performance."
+        "description": "Developed predictive ML models, deep learning solutions, recommendation systems,\nand optimized model inference performance."
       }
     ],
     "skills": [

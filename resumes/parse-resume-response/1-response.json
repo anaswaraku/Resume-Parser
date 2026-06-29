@@ -24,7 +24,10 @@
       }
     ],
     "experience": [],
-    "skills": []
+    "skills": [
+      "and Present technologies",
+      "my skills"
+    ]
   },
   "llm_parser": {
     "name": "YOGAPRIYA HARIBASKAR",
@@ -34,20 +37,20 @@
       {
         "degree": "M.Sc Data Science",
         "school": "Coimbatore Institute of Technology",
-        "start_date": "2017-01",
+        "start_date": "2017",
         "end_date": null
       },
       {
         "degree": "Class XII ( HSC )",
         "school": "Adharsh Vidhyalaya Higher Secondary School, Erode",
-        "start_date": "2016-01",
-        "end_date": "2017-01"
+        "start_date": "2016",
+        "end_date": "2017"
       },
       {
         "degree": "Class X ( SSLC )",
         "school": "R.N.Oxford, Namakkal",
-        "start_date": "2014-01",
-        "end_date": "2015-01"
+        "start_date": "2014",
+        "end_date": "2015"
       }
     ],
     "experience": [
@@ -56,7 +59,7 @@
         "role": "Machine Learning Intern",
         "start_date": "2020-05",
         "end_date": null,
-        "description": "Developed a web application to automatically evaluate answer sheets using Natural Language Processing. Explored DJANGO framework and Wordpress Technology"
+        "description": "• Developed a web application to automatically evaluate answer sheets using Natural Language Processing.\n• Explored DJANGO framework and Wordpress Technology"
       }
     ],
     "skills": [
@@ -75,20 +78,20 @@
     "phone": "+91 7010842961",
     "education": [
       {
-        "degree": "Master of Science Data Science",
-        "school": "Coimbatore Instituteof Technology",
+        "degree": "M.Sc Data Science",
+        "school": "Coimbatore Institute of Technology",
         "start_date": "2017",
-        "end_date": "Present"
+        "end_date": null
       },
       {
-        "degree": "Class XII HSC, 90.00",
+        "degree": "Class XII ( HSC )",
         "school": "Adharsh Vidhyalaya Higher Secondary School, Erode",
         "start_date": "2016",
         "end_date": "2017"
       },
       {
-        "degree": "Class X SSLC",
-        "school": "R.N.Oxford, Namakkal, 97.00",
+        "degree": "Class X ( SSLC )",
+        "school": "R.N.Oxford, Namakkal",
         "start_date": "2014",
         "end_date": "2015"
       }
@@ -99,7 +102,7 @@
         "role": "Machine Learning Intern",
         "start_date": "2020-05",
         "end_date": null,
-        "description": "Developed a web application to automatically evaluate answer sheets using Natural Language Processing. Explored DJANGO framework and Wordpress Technology"
+        "description": "• Developed a web application to automatically evaluate answer sheets using Natural Language Processing.\n• Explored DJANGO framework and Wordpress Technology"
       }
     ],
     "skills": [

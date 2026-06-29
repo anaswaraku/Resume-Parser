@@ -30,7 +30,34 @@
       }
     ],
     "experience": [],
-    "skills": []
+    "skills": [
+      "Android",
+      "C",
+      "Familiar With C",
+      "IDE vim",
+      "Intellij Idea",
+      "J2EE",
+      "Java Type Setting LATEX",
+      "JavaScript Mobile Android",
+      "Language",
+      "MATLAB",
+      "Mac OS X",
+      "Mi-",
+      "Microsoft Office",
+      "Microsoft Vi-",
+      "Open Office",
+      "PHP",
+      "Pascal",
+      "Programming C",
+      "Programming Programming",
+      "Prolog Operating Linux Ubuntu",
+      "Python",
+      "System crosoft Windows",
+      "Web HTML",
+      "gcc",
+      "iOS",
+      "sual Studio"
+    ]
   },
   "llm_parser": {
     "name": "Mohammad Moghimi",
@@ -40,26 +67,26 @@
       {
         "degree": "PhD",
         "school": "Cornell University",
-        "start_date": "2010-01",
-        "end_date": null
+        "start_date": "2010",
+        "end_date": "null"
       },
       {
         "degree": "MSc",
         "school": "Sharif University of Technology",
-        "start_date": "2007-01",
-        "end_date": "2010-01"
+        "start_date": "2007",
+        "end_date": "2010"
       },
       {
         "degree": "BSc",
         "school": "University of Tehran",
-        "start_date": "2003-01",
-        "end_date": "2007-01"
+        "start_date": "2003",
+        "end_date": "2007"
       },
       {
         "degree": "Diploma",
         "school": "Allameh Helli High School",
-        "start_date": "1999-01",
-        "end_date": "2003-01"
+        "start_date": "1999",
+        "end_date": "2003"
       }
     ],
     "experience": [
@@ -67,7 +94,7 @@
         "company": "Computer Vision Lab, Department of Computer Science, Cornell University",
         "role": "Researcher",
         "start_date": "Aug 2014",
-        "end_date": null,
+        "end_date": "null",
         "description": "Egocentric Computer Vision"
       },
       {
@@ -75,21 +102,21 @@
         "role": "Researcher",
         "start_date": "Sep 2011",
         "end_date": "Aug 2014",
-        "description": "Interactive Image-based Geolocation, Egocentric Vision, Object/Activity Recognition"
+        "description": "Interactive Image-based Geolocation\nEgocentric Vision, Object/Activity Recognition"
       },
       {
         "company": "AI Group, Facebook Inc",
         "role": "Researcher",
         "start_date": "Jun 2013",
         "end_date": "Sep 2013",
-        "description": null
+        "description": "1/5"
       },
       {
         "company": "Goggles Team, Google Inc",
         "role": "Researcher",
         "start_date": "Jun 2012",
         "end_date": "Sep 2012",
-        "description": null
+        "description": "Sep 2012"
       },
       {
         "company": "Systems Energy Efficiency Lab, Department of Computer Science and Engineering, University of California, San Diego",
@@ -138,7 +165,7 @@
       "C#",
       "Pascal",
       "Prolog",
-      "Linux",
+      "Linux (Ubuntu)",
       "Mac OS X",
       "Microsoft Windows",
       "Android",
@@ -158,26 +185,26 @@
     "phone": "(858) 888-3337",
     "education": [
       {
-        "degree": "PhD student in Computer Science Computer Vision",
-        "school": "Cornell University, New, York, NY.",
+        "degree": "PhD",
+        "school": "Cornell University",
         "start_date": "2010",
-        "end_date": "Present"
+        "end_date": "null"
       },
       {
-        "degree": "Master of Science in Computer Engineering Artificial Intelligence, 18.67 / 20.",
-        "school": "Sharif University of Technology, Tehran, Iran",
+        "degree": "MSc",
+        "school": "Sharif University of Technology",
         "start_date": "2007",
         "end_date": "2010"
       },
       {
-        "degree": "Bachelor of Science in Computer Engineering Software Engineering, 17.23 / 20.",
-        "school": "University of Tehran, Tehran, Iran",
+        "degree": "BSc",
+        "school": "University of Tehran",
         "start_date": "2003",
         "end_date": "2007"
       },
       {
-        "degree": "Diploma in Mathematics and Physics, Allameh Helli High, school, Tehran, Iran., Exceptional Talents .",
-        "school": "Ranked second among all of the university computer engineering students in year 2003 .",
+        "degree": "Diploma",
+        "school": "Allameh Helli High School",
         "start_date": "1999",
         "end_date": "2003"
       }
@@ -187,7 +214,7 @@
         "company": "Computer Vision Lab, Department of Computer Science, Cornell University",
         "role": "Researcher",
         "start_date": "Aug 2014",
-        "end_date": null,
+        "end_date": "null",
         "description": "Egocentric Computer Vision"
       },
       {
@@ -195,21 +222,21 @@
         "role": "Researcher",
         "start_date": "Sep 2011",
         "end_date": "Aug 2014",
-        "description": "Interactive Image-based Geolocation, Egocentric Vision, Object/Activity Recognition"
+        "description": "Interactive Image-based Geolocation\nEgocentric Vision, Object/Activity Recognition"
       },
       {
         "company": "AI Group, Facebook Inc",
         "role": "Researcher",
         "start_date": "Jun 2013",
         "end_date": "Sep 2013",
-        "description": null
+        "description": "1/5"
       },
       {
         "company": "Goggles Team, Google Inc",
         "role": "Researcher",
         "start_date": "Jun 2012",
         "end_date": "Sep 2012",
-        "description": null
+        "description": "Sep 2012"
       },
       {
         "company": "Systems Energy Efficiency Lab, Department of Computer Science and Engineering, University of California, San Diego",
@@ -258,7 +285,7 @@
       "C#",
       "Pascal",
       "Prolog",
-      "Linux",
+      "Linux (Ubuntu)",
       "Mac OS X",
       "Microsoft Windows",
       "Android",

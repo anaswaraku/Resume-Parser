@@ -18,7 +18,27 @@
       }
     ],
     "experience": [],
-    "skills": []
+    "skills": [
+      "AWS",
+      "C",
+      "CUDA",
+      "GCP",
+      "JAX",
+      "Julia",
+      "Kubernetes",
+      "Neural architecture search",
+      "ONNX",
+      "PyTorch",
+      "Python",
+      "Ray",
+      "Rust",
+      "TensorFlow",
+      "Triton",
+      "distributed training",
+      "efficient inference",
+      "model compression",
+      "multi-agent RL"
+    ]
   },
   "llm_parser": {
     "name": "John Doe",
@@ -26,13 +46,13 @@
     "phone": null,
     "education": [
       {
-        "degree": "PhD",
+        "degree": "PhD in Computer Science",
         "school": "Princeton University",
         "start_date": "2018-09",
         "end_date": "2023-05"
       },
       {
-        "degree": "BS",
+        "degree": "BS in Computer Engineering",
         "school": "Boğaziçi University",
         "start_date": "2014-09",
         "end_date": "2018-06"
@@ -44,35 +64,35 @@
         "role": "Co-Founder & CTO",
         "start_date": "2023-06",
         "end_date": null,
-        "description": "Built foundation model infrastructure serving 2M+ monthly API requests with 99.97% uptime, Raised $18M Series A led by Sequoia Capital, with participation from a16z and Founders Fund, Scaled engineering team from 3 to 28 across ML research, platform, and applied AI divisions, Developed proprietary inference optimization reducing latency by 73% compared to baseline"
+        "description": "Built foundation model infrastructure serving 2M+ monthly API requests with 99.97% uptime\nRaised $18M Series A led by Sequoia Capital, with participation from a16z and Founders Fund\nScaled engineering team from 3 to 28 across ML research, platform, and applied AI divisions\nDeveloped proprietary inference optimization reducing latency by 73% compared to baseline"
       },
       {
         "company": "NVIDIA Research",
         "role": "Research Intern",
         "start_date": "2022-05",
         "end_date": "2022-08",
-        "description": "Designed sparse attention mechanism reducing transformer memory footprint by 4.2x, Co-authored paper accepted at NeurIPS 2022 (spotlight presentation, top 5% of submissions)"
+        "description": "Designed sparse attention mechanism reducing transformer memory footprint by 4.2x\nCo-authored paper accepted at NeurIPS 2022 (spotlight presentation, top 5% of submissions)"
       },
       {
         "company": "Google DeepMind",
         "role": "Research Intern",
         "start_date": "2021-05",
         "end_date": "2021-08",
-        "description": "Developed reinforcement learning algorithms for multi-agent coordination, Published research at top-tier venues with significant academic impact, ICML 2022 main conference paper, cited 340+ times within two years, NeurIPS 2022 workshop paper on emergent communication protocols, Invited journal extension in JMLR (2023)"
+        "description": "Developed reinforcement learning algorithms for multi-agent coordination\nPublished research at top-tier venues with significant academic impact\nICML 2022 main conference paper, cited 340+ times within two years\nNeurIPS 2022 workshop paper on emergent communication protocols\nInvited journal extension in JMLR (2023)"
       },
       {
         "company": "Apple ML Research",
         "role": "Research Intern",
         "start_date": "2020-05",
         "end_date": "2020-08",
-        "description": "Created on-device neural network compression pipeline deployed across 50M+ devices, Filed 2 patents on efficient model quantization techniques for edge inference"
+        "description": "Created on-device neural network compression pipeline deployed across 50M+ devices\nFiled 2 patents on efficient model quantization techniques for edge inference"
       },
       {
         "company": "Microsoft Research",
         "role": "Research Intern",
         "start_date": "2019-05",
         "end_date": "2019-08",
-        "description": "Implemented novel self-supervised learning framework for low-resource language modeling, Research integrated into Azure Cognitive Services, reducing training data requirements by 60%"
+        "description": "Implemented novel self-supervised learning framework for low-resource language modeling\nResearch integrated into Azure Cognitive Services, reducing training data requirements by 60%"
       }
     ],
     "skills": [
@@ -104,15 +124,15 @@
     "education": [
       {
         "degree": "PhD in Computer Science",
-        "school": "Princeton University – Princeton, NJ",
-        "start_date": "Sep",
-        "end_date": "2023"
+        "school": "Princeton University",
+        "start_date": "2018-09",
+        "end_date": "2023-05"
       },
       {
         "degree": "BS in Computer Engineering",
-        "school": "Bo azi i University – Istanbul, T rkiye",
-        "start_date": "Sep",
-        "end_date": "2018"
+        "school": "Boğaziçi University",
+        "start_date": "2014-09",
+        "end_date": "2018-06"
       }
     ],
     "experience": [
@@ -121,35 +141,35 @@
         "role": "Co-Founder & CTO",
         "start_date": "2023-06",
         "end_date": null,
-        "description": "Built foundation model infrastructure serving 2M+ monthly API requests with 99.97% uptime, Raised $18M Series A led by Sequoia Capital, with participation from a16z and Founders Fund, Scaled engineering team from 3 to 28 across ML research, platform, and applied AI divisions, Developed proprietary inference optimization reducing latency by 73% compared to baseline"
+        "description": "Built foundation model infrastructure serving 2M+ monthly API requests with 99.97% uptime\nRaised $18M Series A led by Sequoia Capital, with participation from a16z and Founders Fund\nScaled engineering team from 3 to 28 across ML research, platform, and applied AI divisions\nDeveloped proprietary inference optimization reducing latency by 73% compared to baseline"
       },
       {
         "company": "NVIDIA Research",
         "role": "Research Intern",
         "start_date": "2022-05",
         "end_date": "2022-08",
-        "description": "Designed sparse attention mechanism reducing transformer memory footprint by 4.2x, Co-authored paper accepted at NeurIPS 2022 (spotlight presentation, top 5% of submissions)"
+        "description": "Designed sparse attention mechanism reducing transformer memory footprint by 4.2x\nCo-authored paper accepted at NeurIPS 2022 (spotlight presentation, top 5% of submissions)"
       },
       {
         "company": "Google DeepMind",
         "role": "Research Intern",
         "start_date": "2021-05",
         "end_date": "2021-08",
-        "description": "Developed reinforcement learning algorithms for multi-agent coordination, Published research at top-tier venues with significant academic impact, ICML 2022 main conference paper, cited 340+ times within two years, NeurIPS 2022 workshop paper on emergent communication protocols, Invited journal extension in JMLR (2023)"
+        "description": "Developed reinforcement learning algorithms for multi-agent coordination\nPublished research at top-tier venues with significant academic impact\nICML 2022 main conference paper, cited 340+ times within two years\nNeurIPS 2022 workshop paper on emergent communication protocols\nInvited journal extension in JMLR (2023)"
       },
       {
         "company": "Apple ML Research",
         "role": "Research Intern",
         "start_date": "2020-05",
         "end_date": "2020-08",
-        "description": "Created on-device neural network compression pipeline deployed across 50M+ devices, Filed 2 patents on efficient model quantization techniques for edge inference"
+        "description": "Created on-device neural network compression pipeline deployed across 50M+ devices\nFiled 2 patents on efficient model quantization techniques for edge inference"
       },
       {
         "company": "Microsoft Research",
         "role": "Research Intern",
         "start_date": "2019-05",
         "end_date": "2019-08",
-        "description": "Implemented novel self-supervised learning framework for low-resource language modeling, Research integrated into Azure Cognitive Services, reducing training data requirements by 60%"
+        "description": "Implemented novel self-supervised learning framework for low-resource language modeling\nResearch integrated into Azure Cognitive Services, reducing training data requirements by 60%"
       }
     ],
     "skills": [
