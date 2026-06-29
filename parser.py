@@ -638,6 +638,21 @@ class SkillParser:
 
         return [l for l in lines if not l.is_blank() and not is_sep(l.raw)]
 
+    # List of common sub-headers inside a skills section, or other section
+    # headers that sometimes get mixed into the skills section.
+    _CATEGORY_HEADERS = [
+        "Languages", "Programming Languages", "Scripting Languages",
+        "Frameworks", "Web Frameworks", "ML Frameworks", "Deep Learning Frameworks",
+        "Libraries", "Databases", "Tools", "Platforms", "Cloud Platforms",
+        "Operating Systems", "OS", "DevOps", "Methodologies", "Software",
+        "Technical Skills", "Computer Skills", "Skills", "Proficiencies",
+        "Research Areas", "Areas of Expertise", "Field of interest",
+        "Infrastructure", "Patents", "Publications", "Invited Talks",
+        "Projects", "Awards", "Certifications", "Honors",
+        "Extra Co curricular Activities", "Subject Taught",
+    ]
+    _HEADERS_LOWER = {h.lower() for h in _CATEGORY_HEADERS}
+
     @classmethod
     def process(cls, sections: List[Section]) -> List[str]:
         target = [s for s in sections if s.header == "SKILLS"]
@@ -650,23 +665,47 @@ class SkillParser:
         clean_lines = cls._filter_lines(raw_lines)
         clean_lines = normalizer.normalize(clean_lines)
 
-        # Regex to split by common delimiters like commas, pipes, bullets, and newlines.
+        # Regex to strip category prefixes. Handles optional colon/hyphen.
+        cat_pattern = "|".join(re.escape(h) for h in cls._CATEGORY_HEADERS)
+        category_prefix = re.compile(fr"^(?:{cat_pattern})\s*[:\-]?\s*", re.I)
+
         delimiters = re.compile(r"[,|•·▪▸*;/\n]")
-        # Regex to remove category prefixes like "Languages:", "Tools:", etc.
-        category_prefix = re.compile(r"^[\w\s()\-]+:\s*")
 
         found_skills = set()
 
         for line in clean_lines:
-            # First, remove category prefix from the whole line
-            line_content = category_prefix.sub("", line.raw).strip()
+            line_content = line.raw.strip()
+
+            # If the whole line is just a category header, skip it.
+            if line_content.lower() in cls._HEADERS_LOWER:
+                continue
+
+            # Remove category prefix from the start of the line
+            line_content = category_prefix.sub("", line_content).strip()
 
             # Now, split the remaining content by delimiters
             parts = delimiters.split(line_content)
             for part in parts:
-                cleaned_part = part.strip(" .,")
-                if cleaned_part and cleaned_part.lower() != "and":
-                    found_skills.add(cleaned_part)
+                # Strip leading list markers like "1.", "* "
+                cleaned_part = re.sub(
+                    r"^\s*\d+\.\s*|^\s*[-*•·▪▸]\s*", "", part
+                ).strip(" .,")
+
+                if not cleaned_part or cleaned_part.lower() == "and":
+                    continue
+
+                # --- Filter out noise ---
+                # 1. Too many words (likely a sentence)
+                if len(cleaned_part.split()) > 6:
+                    continue
+                # 2. Just numbers
+                if cleaned_part.isdigit():
+                    continue
+                # 3. The part itself is just a category header
+                if cleaned_part.lower() in cls._HEADERS_LOWER:
+                    continue
+
+                found_skills.add(cleaned_part)
 
         return sorted(list(found_skills))
 
