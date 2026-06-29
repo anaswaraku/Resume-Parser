@@ -1,0 +1,105 @@
+{
+  "traditional_parser": {
+    "name": "Aarav Menon",
+    "email": "aarav.menon.ai@gmail.com",
+    "phone": null,
+    "education": [
+      {
+        "degree": "Master of Technology., Computer Science Engineering Fictional",
+        "school": "Indian Institute of Technology, Fictional",
+        "start_date": null,
+        "end_date": null
+      }
+    ],
+    "experience": [
+      {
+        "company": "Innovexa Technologies Pvt Ltd |",
+        "role": "Senior AI Architect",
+        "start_date": "Jan",
+        "end_date": "Present",
+        "description": "Designed enterprise AI architectures and end-to-end AI pipelines covering ingestion ,"
+      }
+    ],
+    "skills": [
+      "AI Architecture",
+      "AWS SageMaker",
+      "Airflow",
+      "Amazon Bedrock",
+      "Azure ML",
+      "Azure OpenAI",
+      "Deep Learning",
+      "Docker",
+      "FastAPI",
+      "GCP Vertex AI",
+      "GitHub Actions",
+      "Hugging Face",
+      "Kubeflow",
+      "Kubernetes",
+      "LLMs",
+      "LangChain",
+      "LlamaIndex",
+      "MLflow",
+      "NLP",
+      "PyTorch",
+      "Python",
+      "RAG",
+      "REST APIs",
+      "Solution Design",
+      "TensorFlow",
+      "Terraform."
+    ]
+  },
+  "llm_parser": null,
+  "merged_result": {
+    "name": "Aarav Menon",
+    "email": "aarav.menon.ai@gmail.com",
+    "phone": null,
+    "education": [
+      {
+        "degree": "Master of Technology., Computer Science Engineering Fictional",
+        "school": "Indian Institute of Technology, Fictional",
+        "start_date": null,
+        "end_date": null
+      }
+    ],
+    "experience": [
+      {
+        "company": "Innovexa Technologies Pvt Ltd |",
+        "role": "Senior AI Architect",
+        "start_date": "Jan",
+        "end_date": "Present",
+        "description": "Designed enterprise AI architectures and end-to-end AI pipelines covering ingestion ,"
+      }
+    ],
+    "skills": [
+      "AI Architecture",
+      "AWS SageMaker",
+      "Airflow",
+      "Amazon Bedrock",
+      "Azure ML",
+      "Azure OpenAI",
+      "Deep Learning",
+      "Docker",
+      "FastAPI",
+      "GCP Vertex AI",
+      "GitHub Actions",
+      "Hugging Face",
+      "Kubeflow",
+      "Kubernetes",
+      "LLMs",
+      "LangChain",
+      "LlamaIndex",
+      "MLflow",
+      "NLP",
+      "PyTorch",
+      "Python",
+      "RAG",
+      "REST APIs",
+      "Solution Design",
+      "TensorFlow",
+      "Terraform."
+    ]
+  },
+  "parsing_method": "traditional_only",
+  "confidence": null
+}

@@ -1,0 +1,63 @@
+{
+  "traditional_parser": {
+    "name": "John Doe",
+    "email": "john.doe@email.com",
+    "phone": "(415) 555-0142",
+    "education": [
+      {
+        "degree": "UC Berkeley",
+        "school": "Senior Software Engineer with 5 years of proven expertise designing |",
+        "start_date": null,
+        "end_date": "2019"
+      },
+      {
+        "degree": "Bachelor of Science",
+        "school": "Computer Science, and building scalable backend systems, distributed architectures, and, cloud-native infrastructure. Proficient in Go, Python, and Node.js with",
+        "start_date": null,
+        "end_date": null
+      }
+    ],
+    "experience": [
+      {
+        "company": "Dec 2022",
+        "role": "Jun 2021",
+        "start_date": "Jan",
+        "end_date": "Present",
+        "description": "performance , and implementing robust APIs. Demonstrated track\nGo Python Node.js TypeScript\nrecord mentoring junior developers and shipping features to 10M\nJavaScript SQL PostgreSQL\nusers. Expert in containerization Docker , Kubernetes , CI / CD\npipelines , and cloud infrastructure AWS , Azure . Passionate about Redis NoSQL Kafka\nwriting clean , testable code and building systems that scale.\nElasticsearch GraphQL REST APIs\ngRPC AWS ECS Lambda S3 RDS\nDocker Kubernetes Terraform\nSenior Software Engineer\nCI / CD API Design\nStripe • San Francisco , CA\nDesigned and implemented real-time fraud detection pipeline processing Database Optimization\n50K transactions per second using Kafka and Go , reducing fraudulent\nDistributed Systems\ncharges by 18 through optimized distributed system architecture\nLed migration of legacy payment reconciliation service to event-driven Microservices Architecture\nmicroservices architecture , improving system reliability from 99.5 to 99.99\nEvent-driven Systems\nuptime and establishing scalable patterns across platform\nMentored 3 junior engineers and established code review standards adopted Cloud-native Development\nacross payments platform team , ensuring clean , testable code practices\nFeature Flags A / B Testing\nSoftware Engineer\nFigma • San Francisco , CA Observability Datadog PagerDuty\nBuilt collaborative editing infrastructure supporting real-time sync for 4M\ndaily active users using CRDTs and WebSockets , demonstrating expertise in LINKS\ndistributed systems and scalable backend services\nOptimized canvas rendering performance , reducing frame drop rate by 40 linkedin.com/in/johndoe\non large design files through WebGL batching and database query github.com/johndoe\noptimization\nShipped plugin marketplace search feature end-to-end , increasing plugin\ndiscovery by 25 within first quarter through robust API design and\nperformance tuning\nSoftware Engineer\nJul 2019 - May 2021\nNotion • San Francisco , CA\nDeveloped API integrations framework enabling 500 third-party applications\nto connect with Notion workspaces , demonstrating expertise in API design\nand microservices architecture\nImplemented offline-first sync engine for mobile app using SQLite and conflict\nresolution algorithms , showcasing distributed systems knowledge\nReduced API response latency by 60 through query optimization and\nstrategic Redis caching layers , optimizing database performance at scale"
+      }
+    ],
+    "skills": []
+  },
+  "llm_parser": null,
+  "merged_result": {
+    "name": "John Doe",
+    "email": "john.doe@email.com",
+    "phone": "(415) 555-0142",
+    "education": [
+      {
+        "degree": "UC Berkeley",
+        "school": "Senior Software Engineer with 5 years of proven expertise designing |",
+        "start_date": null,
+        "end_date": "2019"
+      },
+      {
+        "degree": "Bachelor of Science",
+        "school": "Computer Science, and building scalable backend systems, distributed architectures, and, cloud-native infrastructure. Proficient in Go, Python, and Node.js with",
+        "start_date": null,
+        "end_date": null
+      }
+    ],
+    "experience": [
+      {
+        "company": "Dec 2022",
+        "role": "Jun 2021",
+        "start_date": "Jan",
+        "end_date": "Present",
+        "description": "performance , and implementing robust APIs. Demonstrated track\nGo Python Node.js TypeScript\nrecord mentoring junior developers and shipping features to 10M\nJavaScript SQL PostgreSQL\nusers. Expert in containerization Docker , Kubernetes , CI / CD\npipelines , and cloud infrastructure AWS , Azure . Passionate about Redis NoSQL Kafka\nwriting clean , testable code and building systems that scale.\nElasticsearch GraphQL REST APIs\ngRPC AWS ECS Lambda S3 RDS\nDocker Kubernetes Terraform\nSenior Software Engineer\nCI / CD API Design\nStripe • San Francisco , CA\nDesigned and implemented real-time fraud detection pipeline processing Database Optimization\n50K transactions per second using Kafka and Go , reducing fraudulent\nDistributed Systems\ncharges by 18 through optimized distributed system architecture\nLed migration of legacy payment reconciliation service to event-driven Microservices Architecture\nmicroservices architecture , improving system reliability from 99.5 to 99.99\nEvent-driven Systems\nuptime and establishing scalable patterns across platform\nMentored 3 junior engineers and established code review standards adopted Cloud-native Development\nacross payments platform team , ensuring clean , testable code practices\nFeature Flags A / B Testing\nSoftware Engineer\nFigma • San Francisco , CA Observability Datadog PagerDuty\nBuilt collaborative editing infrastructure supporting real-time sync for 4M\ndaily active users using CRDTs and WebSockets , demonstrating expertise in LINKS\ndistributed systems and scalable backend services\nOptimized canvas rendering performance , reducing frame drop rate by 40 linkedin.com/in/johndoe\non large design files through WebGL batching and database query github.com/johndoe\noptimization\nShipped plugin marketplace search feature end-to-end , increasing plugin\ndiscovery by 25 within first quarter through robust API design and\nperformance tuning\nSoftware Engineer\nJul 2019 - May 2021\nNotion • San Francisco , CA\nDeveloped API integrations framework enabling 500 third-party applications\nto connect with Notion workspaces , demonstrating expertise in API design\nand microservices architecture\nImplemented offline-first sync engine for mobile app using SQLite and conflict\nresolution algorithms , showcasing distributed systems knowledge\nReduced API response latency by 60 through query optimization and\nstrategic Redis caching layers , optimizing database performance at scale"
+      }
+    ],
+    "skills": []
+  },
+  "parsing_method": "traditional_only",
+  "confidence": null
+}

@@ -1,0 +1,218 @@
+{
+  "traditional_parser": {
+    "name": "John Doe",
+    "email": "john.doe@email.com",
+    "phone": null,
+    "education": [
+      {
+        "degree": "",
+        "school": "Princeton University – Princeton, NJ",
+        "start_date": "Sep",
+        "end_date": "2023"
+      },
+      {
+        "degree": "PhD in Computer Science, Thesis Efficient Neural Architecture Search for Resource-Constrained Deployment, Advisor Prof. Sanjeev Arora, NSF Graduate Research Fellowship, Siebel Scholar Class of 2022",
+        "school": "Bo azi i University – Istanbul, T rkiye",
+        "start_date": "Sep",
+        "end_date": "2018"
+      },
+      {
+        "degree": "BS in Computer Engineering",
+        "school": null,
+        "start_date": null,
+        "end_date": null
+      }
+    ],
+    "experience": [
+      {
+        "company": null,
+        "role": "Nexus AI , Co-Founder CTO – San Francisco , CA",
+        "start_date": "June",
+        "end_date": "Present",
+        "description": "Built foundation model infrastructure serving 2M monthly API requests with 99.97\nuptime\nRaised 18M Series A led by Sequoia Capital , with participation from a16z and\nFounders Fund\nScaled engineering team from 3 to 28 across ML research , platform , and applied AI\ndivisions\nDeveloped proprietary inference optimization reducing latency by 73 compared to\nbaseline\nNVIDIA Research , Research Intern – Santa Clara , CA May 2022 – Aug 2022\nDesigned sparse attention mechanism reducing transformer memory footprint by 4.2x\nCo-authored paper accepted at NeurIPS 2022 spotlight presentation , top 5 of\nsubmissions\nGoogle DeepMind , Research Intern – London , UK May 2021 – Aug 2021\nDeveloped reinforcement learning algorithms for multi-agent coordination\nPublished research at top-tier venues with significant academic impact\nICML 2022 main conference paper , cited 340 times within two years\nNeurIPS 2022 workshop paper on emergent communication protocols\nInvited journal extension in JMLR 2023\nApple ML Research , Research Intern – Cupertino , CA May 2020 – Aug 2020\nCreated on-device neural network compression pipeline deployed across 50M\ndevices\nFiled 2 patents on efficient model quantization techniques for edge inference\nMicrosoft Research , Research Intern – Redmond , WA May 2019 – Aug 2019\nImplemented novel self-supervised learning framework for low-resource language\nmodeling\nResearch integrated into Azure Cognitive Services , reducing training data\nrequirements by 60"
+      }
+    ],
+    "skills": [
+      "C",
+      "CUDA",
+      "JAX",
+      "Julia",
+      "Languages Python",
+      "ML Frameworks PyTorch",
+      "ONNX",
+      "Rust",
+      "TensorFlow",
+      "Triton"
+    ]
+  },
+  "llm_parser": {
+    "name": "John Doe",
+    "email": "john.doe@email.com",
+    "phone": null,
+    "education": [
+      {
+        "degree": "PhD",
+        "school": "Princeton University",
+        "start_date": "2018-09",
+        "end_date": "2023-05"
+      },
+      {
+        "degree": "BS",
+        "school": "Boğaziçi University",
+        "start_date": "2014-09",
+        "end_date": "2018-06"
+      }
+    ],
+    "experience": [
+      {
+        "company": "Nexus AI",
+        "role": "Co-Founder & CTO",
+        "start_date": "2023-06",
+        "end_date": null,
+        "description": "Built foundation model infrastructure serving 2M+ monthly API requests with 99.97% uptime, Raised $18M Series A led by Sequoia Capital, with participation from a16z and Founders Fund, Scaled engineering team from 3 to 28 across ML research, platform, and applied AI divisions, Developed proprietary inference optimization reducing latency by 73% compared to baseline"
+      },
+      {
+        "company": "NVIDIA Research",
+        "role": "Research Intern",
+        "start_date": "2022-05",
+        "end_date": "2022-08",
+        "description": "Designed sparse attention mechanism reducing transformer memory footprint by 4.2x, Co-authored paper accepted at NeurIPS 2022 (spotlight presentation, top 5% of submissions)"
+      },
+      {
+        "company": "Google DeepMind",
+        "role": "Research Intern",
+        "start_date": "2021-05",
+        "end_date": "2021-08",
+        "description": "Developed reinforcement learning algorithms for multi-agent coordination, Published research at top-tier venues with significant academic impact, ICML 2022 main conference paper, cited 340+ times within two years, NeurIPS 2022 workshop paper on emergent communication protocols, Invited journal extension in JMLR (2023)"
+      },
+      {
+        "company": "Apple ML Research",
+        "role": "Research Intern",
+        "start_date": "2020-05",
+        "end_date": "2020-08",
+        "description": "Created on-device neural network compression pipeline deployed across 50M+ devices, Filed 2 patents on efficient model quantization techniques for edge inference"
+      },
+      {
+        "company": "Microsoft Research",
+        "role": "Research Intern",
+        "start_date": "2019-05",
+        "end_date": "2019-08",
+        "description": "Implemented novel self-supervised learning framework for low-resource language modeling, Research integrated into Azure Cognitive Services, reducing training data requirements by 60%"
+      }
+    ],
+    "skills": [
+      "Python",
+      "C++",
+      "CUDA",
+      "Rust",
+      "Julia",
+      "PyTorch",
+      "JAX",
+      "TensorFlow",
+      "Triton",
+      "ONNX",
+      "Kubernetes",
+      "Ray",
+      "distributed training",
+      "AWS",
+      "GCP",
+      "Neural architecture search",
+      "model compression",
+      "efficient inference",
+      "multi-agent RL"
+    ]
+  },
+  "merged_result": {
+    "name": "John Doe",
+    "email": "john.doe@email.com",
+    "phone": null,
+    "education": [
+      {
+        "degree": "PhD",
+        "school": "Princeton University",
+        "start_date": "2018-09",
+        "end_date": "2023-05"
+      },
+      {
+        "degree": "BS",
+        "school": "Boğaziçi University",
+        "start_date": "2014-09",
+        "end_date": "2018-06"
+      },
+      {
+        "degree": "BS in Computer Engineering",
+        "school": null,
+        "start_date": null,
+        "end_date": null
+      }
+    ],
+    "experience": [
+      {
+        "company": "Nexus AI",
+        "role": "Co-Founder & CTO",
+        "start_date": "2023-06",
+        "end_date": null,
+        "description": "Built foundation model infrastructure serving 2M+ monthly API requests with 99.97% uptime, Raised $18M Series A led by Sequoia Capital, with participation from a16z and Founders Fund, Scaled engineering team from 3 to 28 across ML research, platform, and applied AI divisions, Developed proprietary inference optimization reducing latency by 73% compared to baseline"
+      },
+      {
+        "company": "NVIDIA Research",
+        "role": "Research Intern",
+        "start_date": "2022-05",
+        "end_date": "2022-08",
+        "description": "Designed sparse attention mechanism reducing transformer memory footprint by 4.2x, Co-authored paper accepted at NeurIPS 2022 (spotlight presentation, top 5% of submissions)"
+      },
+      {
+        "company": "Google DeepMind",
+        "role": "Research Intern",
+        "start_date": "2021-05",
+        "end_date": "2021-08",
+        "description": "Developed reinforcement learning algorithms for multi-agent coordination, Published research at top-tier venues with significant academic impact, ICML 2022 main conference paper, cited 340+ times within two years, NeurIPS 2022 workshop paper on emergent communication protocols, Invited journal extension in JMLR (2023)"
+      },
+      {
+        "company": "Apple ML Research",
+        "role": "Research Intern",
+        "start_date": "2020-05",
+        "end_date": "2020-08",
+        "description": "Created on-device neural network compression pipeline deployed across 50M+ devices, Filed 2 patents on efficient model quantization techniques for edge inference"
+      },
+      {
+        "company": "Microsoft Research",
+        "role": "Research Intern",
+        "start_date": "2019-05",
+        "end_date": "2019-08",
+        "description": "Implemented novel self-supervised learning framework for low-resource language modeling, Research integrated into Azure Cognitive Services, reducing training data requirements by 60%"
+      }
+    ],
+    "skills": [
+      "Python",
+      "C++",
+      "CUDA",
+      "Rust",
+      "Julia",
+      "PyTorch",
+      "JAX",
+      "TensorFlow",
+      "Triton",
+      "ONNX",
+      "Kubernetes",
+      "Ray",
+      "distributed training",
+      "AWS",
+      "GCP",
+      "Neural architecture search",
+      "model compression",
+      "efficient inference",
+      "multi-agent RL"
+    ]
+  },
+  "parsing_method": "hybrid",
+  "confidence": {
+    "name_from_llm": true,
+    "email_from_llm": true,
+    "phone_from_llm": false,
+    "education_added_by_llm": 2,
+    "experience_added_by_llm": 5,
+    "skills_added_by_llm": 12,
+    "improvement_pct": 50
+  }
+}
