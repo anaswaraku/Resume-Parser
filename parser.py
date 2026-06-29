@@ -585,8 +585,18 @@ class EducationParser:
 
             school = ", ".join(school_parts)
 
-            # Degree is everything before the school part.
-            degree_parts = parts[:school_idx]
+            # Degree is everything that is NOT part of the school + location.
+            school_part_indices = set(range(school_idx, school_idx + len(school_parts)))
+            potential_degree_parts = [
+                p for i, p in enumerate(parts) if i not in school_part_indices
+            ]
+            # Filter out long parts that don't contain degree keywords (likely summary text)
+            degree_parts = []
+            for p in potential_degree_parts:
+                # Keep part if it contains a degree keyword, or if it's short (e.g., a major)
+                if cls._DEGREE_KW.search(p) or len(p.split()) < 8:
+                    degree_parts.append(p)
+
             degree = ", ".join(d for d in degree_parts if d).strip() or None
 
         else:  # No school keyword found, fallback to heuristics
