@@ -58,14 +58,51 @@ def extract_text_from_txt(filepath: str) -> str:
 
 
 def _strip_rtf(text: str) -> str:
-    """Remove RTF control sequences, preserve paragraph breaks."""
+    """Remove RTF control sequences, preserve paragraph breaks using a state-machine parser."""
+    # Replace \par and \line with newlines
     text = re.sub(r'\\par\b|\\line\b', '\n', text, flags=re.I)
     text = re.sub(r'\\u(-?\d+)\?', lambda m: chr(int(m.group(1)) % 65536), text)
-    prev = None
-    while prev != text:                          # iteratively remove nested braces
-        prev = text
-        text = re.sub(r'\{[^{}]*\}', ' ', text)
-    text = re.sub(r'\\[a-z]+\-?\d*\s?', ' ', text)
-    text = re.sub(r'[{}\\]', ' ', text)
-    lines = [re.sub(r'[ \t]+', ' ', ln).strip() for ln in text.split('\n')]
+    
+    # State machine to parse RTF content
+    pattern = re.compile(
+        r'\\([a-z]{1,32})(-?\d+)? ?|\\\'([0-9a-f]{2})|\\([^a-z])|([{}])|([^\\{}]+)',
+        re.IGNORECASE
+    )
+    stack = []
+    parts = []
+    ignoring = False
+    
+    for match in pattern.finditer(text):
+        word, arg, hexchar, symbol, brace, plain = match.groups()
+        if brace:
+            if brace == '{':
+                stack.append(ignoring)
+            elif brace == '}':
+                if stack:
+                    ignoring = stack.pop()
+                else:
+                    ignoring = False
+        elif plain:
+            if not ignoring:
+                parts.append(plain)
+        elif word:
+            # Common RTF destination control words to ignore
+            if word.lower() in (
+                'fonttbl', 'colortbl', 'stylesheet', 'info', 'listtable',
+                'listoverridetable', 'xmlnstbl', 'picw', 'pich'
+            ):
+                ignoring = True
+        elif symbol:
+            if symbol == '*':
+                ignoring = True
+        elif hexchar:
+            if not ignoring:
+                try:
+                    parts.append(chr(int(hexchar, 16)))
+                except ValueError:
+                    pass
+                    
+    cleaned = "".join(parts)
+    # Remove consecutive spaces and trim lines
+    lines = [re.sub(r'[ \t]+', ' ', ln).strip() for ln in cleaned.split('\n')]
     return '\n'.join(ln for ln in lines if ln)

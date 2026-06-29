@@ -82,7 +82,7 @@ def _parse_resume(resume_text: str, use_llm: bool):
     This is the single source of truth for the tokenise → parse → merge sequence.
     """
     tokens = Lexer().tokenize(resume_text)
-    traditional_result = ResumeParser().build(tokens=tokens)
+    traditional_result = ResumeParser().build(tokens=tokens, raw_text=resume_text)
 
     if use_llm:
         llm_result = llm_parser.parse_with_llm(resume_text)

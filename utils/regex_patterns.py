@@ -2,7 +2,7 @@ import re
 
 # Shared regular expression components for dates
 MONTH_STR = r'(?:January|February|March|April|May|June|July|August|September|October|November|December|Jan|Feb|Mar|Apr|Jun|Jul|Aug|Sep|Oct|Nov|Dec|0?[1-9]|1[0-2])'
-YEAR_STR = r'(?:19|20)\d{2}'
+YEAR_STR = r'(?:19|20)(?:\d{2}|[xX]{2})'
 SEP_STR = r'[\s\-/\.,]+'
 RANGE_SEP_STR = r'(?:\s*[-–—]+\s*|\s+to\s+|\s+)'
 PRESENT_STR = r'(?:present|current|now)'
