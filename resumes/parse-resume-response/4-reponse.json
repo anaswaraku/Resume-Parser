@@ -1,0 +1,155 @@
+{
+  "traditional_parser": {
+    "name": "Aarav Menon",
+    "email": "aarav.menon.ai@gmail.com",
+    "phone": null,
+    "education": [
+      {
+        "degree": "Master of Technology., Computer Science Engineering Fictional",
+        "school": "Indian Institute of Technology, Fictional",
+        "start_date": null,
+        "end_date": null
+      }
+    ],
+    "experience": [],
+    "skills": []
+  },
+  "llm_parser": {
+    "name": "Aarav Menon",
+    "email": "aarav.menon.ai@gmail.com",
+    "phone": null,
+    "education": [
+      {
+        "degree": "M.Tech., Computer Science & Engineering",
+        "school": "Indian Institute of Technology (Fictional)",
+        "start_date": null,
+        "end_date": null
+      }
+    ],
+    "experience": [
+      {
+        "company": "Innovexa Technologies Pvt Ltd",
+        "role": "Senior AI Architect",
+        "start_date": "Jan 2022",
+        "end_date": null,
+        "description": "Designed enterprise AI architectures and end-to-end AI pipelines covering ingestion, training, inference, monitoring, and retraining. Built production NLP and Generative AI solutions using Python, FastAPI, Transformers, and RAG. Integrated AI services with enterprise APIs and cloud platforms. Implemented MLOps with MLflow, Kubeflow, Docker, Kubernetes, CI/CD, monitoring, governance, and drift detection. Led a team of 15 AI engineers and mentored teams on AI architecture and MLOps best practices."
+      },
+      {
+        "company": "NextWave Digital Solutions",
+        "role": "AI Technical Lead",
+        "start_date": "Jul 2018",
+        "end_date": "Dec 2021",
+        "description": "Led NLP modernization projects, automated ML pipelines using Airflow, deployed scalable AI APIs, and implemented MLflow-based experiment tracking."
+      },
+      {
+        "company": "DataVision Analytics",
+        "role": "Machine Learning Engineer",
+        "start_date": "Jun 2015",
+        "end_date": "Jun 2018",
+        "description": "Developed predictive ML models, deep learning solutions, recommendation systems, and optimized model inference performance."
+      }
+    ],
+    "skills": [
+      "AI Architecture",
+      "Solution Design",
+      "Python",
+      "Deep Learning",
+      "NLP",
+      "LLMs",
+      "RAG",
+      "PyTorch",
+      "TensorFlow",
+      "Hugging Face",
+      "LangChain",
+      "LlamaIndex",
+      "MLflow",
+      "Kubeflow",
+      "Docker",
+      "Kubernetes",
+      "Airflow",
+      "FastAPI",
+      "REST APIs",
+      "AWS SageMaker",
+      "Amazon Bedrock",
+      "Azure ML",
+      "Azure OpenAI",
+      "GCP Vertex AI",
+      "GitHub Actions",
+      "Terraform"
+    ]
+  },
+  "merged_result": {
+    "name": "Aarav Menon",
+    "email": "aarav.menon.ai@gmail.com",
+    "phone": null,
+    "education": [
+      {
+        "degree": "Master of Technology., Computer Science Engineering Fictional",
+        "school": "Indian Institute of Technology, Fictional",
+        "start_date": null,
+        "end_date": null
+      }
+    ],
+    "experience": [
+      {
+        "company": "Innovexa Technologies Pvt Ltd",
+        "role": "Senior AI Architect",
+        "start_date": "Jan 2022",
+        "end_date": null,
+        "description": "Designed enterprise AI architectures and end-to-end AI pipelines covering ingestion, training, inference, monitoring, and retraining. Built production NLP and Generative AI solutions using Python, FastAPI, Transformers, and RAG. Integrated AI services with enterprise APIs and cloud platforms. Implemented MLOps with MLflow, Kubeflow, Docker, Kubernetes, CI/CD, monitoring, governance, and drift detection. Led a team of 15 AI engineers and mentored teams on AI architecture and MLOps best practices."
+      },
+      {
+        "company": "NextWave Digital Solutions",
+        "role": "AI Technical Lead",
+        "start_date": "Jul 2018",
+        "end_date": "Dec 2021",
+        "description": "Led NLP modernization projects, automated ML pipelines using Airflow, deployed scalable AI APIs, and implemented MLflow-based experiment tracking."
+      },
+      {
+        "company": "DataVision Analytics",
+        "role": "Machine Learning Engineer",
+        "start_date": "Jun 2015",
+        "end_date": "Jun 2018",
+        "description": "Developed predictive ML models, deep learning solutions, recommendation systems, and optimized model inference performance."
+      }
+    ],
+    "skills": [
+      "AI Architecture",
+      "Solution Design",
+      "Python",
+      "Deep Learning",
+      "NLP",
+      "LLMs",
+      "RAG",
+      "PyTorch",
+      "TensorFlow",
+      "Hugging Face",
+      "LangChain",
+      "LlamaIndex",
+      "MLflow",
+      "Kubeflow",
+      "Docker",
+      "Kubernetes",
+      "Airflow",
+      "FastAPI",
+      "REST APIs",
+      "AWS SageMaker",
+      "Amazon Bedrock",
+      "Azure ML",
+      "Azure OpenAI",
+      "GCP Vertex AI",
+      "GitHub Actions",
+      "Terraform"
+    ]
+  },
+  "parsing_method": "hybrid",
+  "confidence": {
+    "name_from_llm": false,
+    "email_from_llm": false,
+    "phone_from_llm": false,
+    "education_added_by_llm": 0,
+    "experience_added_by_llm": 3,
+    "skills_added_by_llm": 26,
+    "improvement_pct": 33.3
+  }
+}

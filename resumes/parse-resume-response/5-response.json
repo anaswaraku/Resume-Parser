@@ -1,0 +1,285 @@
+{
+  "traditional_parser": {
+    "name": "Mohammad Moghimi",
+    "email": "mmoghimi@cs.cornell.edu",
+    "phone": "(858) 888-3337",
+    "education": [
+      {
+        "degree": "PhD student in Computer Science Computer Vision",
+        "school": "Cornell University, New, York, NY.",
+        "start_date": "2010",
+        "end_date": "Present"
+      },
+      {
+        "degree": "Master of Science in Computer Engineering Artificial Intelligence, 18.67 / 20.",
+        "school": "Sharif University of Technology, Tehran, Iran",
+        "start_date": "2007",
+        "end_date": "2010"
+      },
+      {
+        "degree": "Bachelor of Science in Computer Engineering Software Engineering, 17.23 / 20.",
+        "school": "University of Tehran, Tehran, Iran",
+        "start_date": "2003",
+        "end_date": "2007"
+      },
+      {
+        "degree": "Diploma in Mathematics and Physics, Allameh Helli High, school, Tehran, Iran., Exceptional Talents .",
+        "school": "Ranked second among all of the university computer engineering students in year 2003 .",
+        "start_date": "1999",
+        "end_date": "2003"
+      }
+    ],
+    "experience": [],
+    "skills": []
+  },
+  "llm_parser": {
+    "name": "Mohammad Moghimi",
+    "email": "mmoghimi@cs.cornell.edu",
+    "phone": "H (858) 888-3337",
+    "education": [
+      {
+        "degree": "PhD",
+        "school": "Cornell University",
+        "start_date": "2010-01",
+        "end_date": null
+      },
+      {
+        "degree": "MSc",
+        "school": "Sharif University of Technology",
+        "start_date": "2007-01",
+        "end_date": "2010-01"
+      },
+      {
+        "degree": "BSc",
+        "school": "University of Tehran",
+        "start_date": "2003-01",
+        "end_date": "2007-01"
+      },
+      {
+        "degree": "Diploma",
+        "school": "Allameh Helli High School",
+        "start_date": "1999-01",
+        "end_date": "2003-01"
+      }
+    ],
+    "experience": [
+      {
+        "company": "Computer Vision Lab, Department of Computer Science, Cornell University",
+        "role": "Researcher",
+        "start_date": "Aug 2014",
+        "end_date": null,
+        "description": "Egocentric Computer Vision"
+      },
+      {
+        "company": "Computer Vision Lab, Department of Computer Science and Engineering, University of California, San Diego",
+        "role": "Researcher",
+        "start_date": "Sep 2011",
+        "end_date": "Aug 2014",
+        "description": "Interactive Image-based Geolocation, Egocentric Vision, Object/Activity Recognition"
+      },
+      {
+        "company": "AI Group, Facebook Inc",
+        "role": "Researcher",
+        "start_date": "Jun 2013",
+        "end_date": "Sep 2013",
+        "description": null
+      },
+      {
+        "company": "Goggles Team, Google Inc",
+        "role": "Researcher",
+        "start_date": "Jun 2012",
+        "end_date": "Sep 2012",
+        "description": null
+      },
+      {
+        "company": "Systems Energy Efficiency Lab, Department of Computer Science and Engineering, University of California, San Diego",
+        "role": "Researcher",
+        "start_date": "Sep 2010",
+        "end_date": "Jun 2011",
+        "description": "Energy Management in Mobile Phones"
+      },
+      {
+        "company": "Department of Schölkopf, Max Planck Institute for Biological Cybernetics",
+        "role": "Researcher",
+        "start_date": "Oct 2009",
+        "end_date": "Dec 2009",
+        "description": "Blind Deconvolution Using Variational Bayesian Method"
+      },
+      {
+        "company": "Image Processing Laboratory (IPL), Computer Engineering Department, Sharif University of Technology",
+        "role": "Researcher",
+        "start_date": "Feb 2008",
+        "end_date": "Aug 2010",
+        "description": "Multiclass Visual Object Recognition Based on Cluttered Images"
+      },
+      {
+        "company": "Multi-Agent Systems Research Group, University of Tehran Technology Incubator (MASLAB)",
+        "role": "Researcher",
+        "start_date": "Oct 2004",
+        "end_date": "Mar 2006",
+        "description": "Development of Autonomous Soccer Agents for Robocup Competition"
+      },
+      {
+        "company": "Sepanta Robotics Research Foundation (SRRF)",
+        "role": "Researcher",
+        "start_date": "Aug 2006",
+        "end_date": "Sep 2006",
+        "description": "Multi Processor Task Scheduling"
+      }
+    ],
+    "skills": [
+      "C/C++",
+      "Python",
+      "MATLAB",
+      "Java",
+      "LATEX",
+      "Open Office",
+      "Microsoft Office",
+      "C#",
+      "Pascal",
+      "Prolog",
+      "Linux",
+      "Mac OS X",
+      "Microsoft Windows",
+      "Android",
+      "iOS",
+      "HTML",
+      "PHP",
+      "J2EE",
+      "JavaScript",
+      "vim/gcc",
+      "Intellij Idea",
+      "Microsoft Visual Studio"
+    ]
+  },
+  "merged_result": {
+    "name": "Mohammad Moghimi",
+    "email": "mmoghimi@cs.cornell.edu",
+    "phone": "(858) 888-3337",
+    "education": [
+      {
+        "degree": "PhD student in Computer Science Computer Vision",
+        "school": "Cornell University, New, York, NY.",
+        "start_date": "2010",
+        "end_date": "Present"
+      },
+      {
+        "degree": "Master of Science in Computer Engineering Artificial Intelligence, 18.67 / 20.",
+        "school": "Sharif University of Technology, Tehran, Iran",
+        "start_date": "2007",
+        "end_date": "2010"
+      },
+      {
+        "degree": "Bachelor of Science in Computer Engineering Software Engineering, 17.23 / 20.",
+        "school": "University of Tehran, Tehran, Iran",
+        "start_date": "2003",
+        "end_date": "2007"
+      },
+      {
+        "degree": "Diploma in Mathematics and Physics, Allameh Helli High, school, Tehran, Iran., Exceptional Talents .",
+        "school": "Ranked second among all of the university computer engineering students in year 2003 .",
+        "start_date": "1999",
+        "end_date": "2003"
+      }
+    ],
+    "experience": [
+      {
+        "company": "Computer Vision Lab, Department of Computer Science, Cornell University",
+        "role": "Researcher",
+        "start_date": "Aug 2014",
+        "end_date": null,
+        "description": "Egocentric Computer Vision"
+      },
+      {
+        "company": "Computer Vision Lab, Department of Computer Science and Engineering, University of California, San Diego",
+        "role": "Researcher",
+        "start_date": "Sep 2011",
+        "end_date": "Aug 2014",
+        "description": "Interactive Image-based Geolocation, Egocentric Vision, Object/Activity Recognition"
+      },
+      {
+        "company": "AI Group, Facebook Inc",
+        "role": "Researcher",
+        "start_date": "Jun 2013",
+        "end_date": "Sep 2013",
+        "description": null
+      },
+      {
+        "company": "Goggles Team, Google Inc",
+        "role": "Researcher",
+        "start_date": "Jun 2012",
+        "end_date": "Sep 2012",
+        "description": null
+      },
+      {
+        "company": "Systems Energy Efficiency Lab, Department of Computer Science and Engineering, University of California, San Diego",
+        "role": "Researcher",
+        "start_date": "Sep 2010",
+        "end_date": "Jun 2011",
+        "description": "Energy Management in Mobile Phones"
+      },
+      {
+        "company": "Department of Schölkopf, Max Planck Institute for Biological Cybernetics",
+        "role": "Researcher",
+        "start_date": "Oct 2009",
+        "end_date": "Dec 2009",
+        "description": "Blind Deconvolution Using Variational Bayesian Method"
+      },
+      {
+        "company": "Image Processing Laboratory (IPL), Computer Engineering Department, Sharif University of Technology",
+        "role": "Researcher",
+        "start_date": "Feb 2008",
+        "end_date": "Aug 2010",
+        "description": "Multiclass Visual Object Recognition Based on Cluttered Images"
+      },
+      {
+        "company": "Multi-Agent Systems Research Group, University of Tehran Technology Incubator (MASLAB)",
+        "role": "Researcher",
+        "start_date": "Oct 2004",
+        "end_date": "Mar 2006",
+        "description": "Development of Autonomous Soccer Agents for Robocup Competition"
+      },
+      {
+        "company": "Sepanta Robotics Research Foundation (SRRF)",
+        "role": "Researcher",
+        "start_date": "Aug 2006",
+        "end_date": "Sep 2006",
+        "description": "Multi Processor Task Scheduling"
+      }
+    ],
+    "skills": [
+      "C/C++",
+      "Python",
+      "MATLAB",
+      "Java",
+      "LATEX",
+      "Open Office",
+      "Microsoft Office",
+      "C#",
+      "Pascal",
+      "Prolog",
+      "Linux",
+      "Mac OS X",
+      "Microsoft Windows",
+      "Android",
+      "iOS",
+      "HTML",
+      "PHP",
+      "J2EE",
+      "JavaScript",
+      "vim/gcc",
+      "Intellij Idea",
+      "Microsoft Visual Studio"
+    ]
+  },
+  "parsing_method": "hybrid",
+  "confidence": {
+    "name_from_llm": false,
+    "email_from_llm": false,
+    "phone_from_llm": false,
+    "education_added_by_llm": 0,
+    "experience_added_by_llm": 9,
+    "skills_added_by_llm": 22,
+    "improvement_pct": 33.3
+  }
+}

@@ -5,35 +5,14 @@
     "phone": null,
     "education": [
       {
-        "degree": "Bachelor of Science",
-        "school": "Computer Science, CSU East Bay",
-        "start_date": null,
-        "end_date": null
+        "degree": "Bachelor of Science, Computer Science",
+        "school": "CSU East Bay",
+        "start_date": "May 20XX",
+        "end_date": "20XX"
       }
     ],
-    "experience": [
-      {
-        "company": "September 20XX",
-        "role": "Computer Programmer June 20XX",
-        "start_date": null,
-        "end_date": null,
-        "description": "NASA / Marshall Space Flight Center , Alabama\nLearned VAX / VMS system and Machine and Assembly Language\nDeveloped understanding of Ingres database and Equal preprocessor\nRevised existing program to maintain flight schedules by integrating with Ingres database\nIntroduced new program to find a peak frequency of input using the Marinco array processing\nboard and Vectrix graphics monitor\nTutor and Grader , CSU East Bay , September 20XX – Present\nMathematics Intern , CSU East Bay Learning Center , Hayward , CA , April 20XX – June 20XX"
-      }
-    ],
-    "skills": [
-      "Advanced PASCAL",
-      "C",
-      "Icon",
-      "Ingres database",
-      "LISP",
-      "Machine and Assembly Language for the PDP – 11 and M68000",
-      "Modula-II",
-      "UNIX and VAX",
-      "VMS systems",
-      "and Equal preprocessor",
-      "and FORTRAN",
-      "dBASE III"
-    ]
+    "experience": [],
+    "skills": []
   },
   "llm_parser": {
     "name": "Rosa Gutierrez",
@@ -86,15 +65,15 @@
     ]
   },
   "merged_result": {
-    "name": "Rosa Gutierrez",
+    "name": "ROSA GUTIERREZ",
     "email": null,
     "phone": null,
     "education": [
       {
-        "degree": "Bachelor of Science",
+        "degree": "Bachelor of Science, Computer Science",
         "school": "CSU East Bay",
-        "start_date": "20XX-05",
-        "end_date": null
+        "start_date": "May 20XX",
+        "end_date": "20XX"
       }
     ],
     "experience": [
@@ -118,13 +97,6 @@
         "start_date": "20XX-04",
         "end_date": "20XX-06",
         "description": null
-      },
-      {
-        "company": "September 20XX",
-        "role": "Computer Programmer June 20XX",
-        "start_date": null,
-        "end_date": null,
-        "description": "NASA / Marshall Space Flight Center , Alabama\nLearned VAX / VMS system and Machine and Assembly Language\nDeveloped understanding of Ingres database and Equal preprocessor\nRevised existing program to maintain flight schedules by integrating with Ingres database\nIntroduced new program to find a peak frequency of input using the Marinco array processing\nboard and Vectrix graphics monitor\nTutor and Grader , CSU East Bay , September 20XX – Present\nMathematics Intern , CSU East Bay Learning Center , Hayward , CA , April 20XX – June 20XX"
       }
     ],
     "skills": [
@@ -144,12 +116,12 @@
   },
   "parsing_method": "hybrid",
   "confidence": {
-    "name_from_llm": true,
+    "name_from_llm": false,
     "email_from_llm": false,
     "phone_from_llm": false,
-    "education_added_by_llm": 1,
+    "education_added_by_llm": 0,
     "experience_added_by_llm": 3,
-    "skills_added_by_llm": 4,
-    "improvement_pct": 50
+    "skills_added_by_llm": 12,
+    "improvement_pct": 33.3
   }
 }

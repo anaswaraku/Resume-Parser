@@ -1,0 +1,127 @@
+{
+  "traditional_parser": {
+    "name": "ROSA GUTIERREZ",
+    "email": null,
+    "phone": null,
+    "education": [
+      {
+        "degree": "Bachelor of Science, Computer Science",
+        "school": "CSU East Bay",
+        "start_date": "May 20XX",
+        "end_date": "20XX"
+      }
+    ],
+    "experience": [],
+    "skills": []
+  },
+  "llm_parser": {
+    "name": "Rosa Gutierrez",
+    "email": null,
+    "phone": null,
+    "education": [
+      {
+        "degree": "Bachelor of Science",
+        "school": "CSU East Bay",
+        "start_date": "20XX-05",
+        "end_date": null
+      }
+    ],
+    "experience": [
+      {
+        "company": "NASA/Marshall Space Flight Center",
+        "role": "Computer Programmer",
+        "start_date": "20XX-06",
+        "end_date": "20XX-09",
+        "description": "Learned VAX/VMS system and Machine and Assembly Language, Developed understanding of Ingres database and Equal preprocessor, Revised existing program to maintain flight schedules by integrating with Ingres database, Introduced new program to find a peak frequency of input using the Marinco array processing board and Vectrix graphics monitor"
+      },
+      {
+        "company": "Tutor and Grader, CSU East Bay",
+        "role": "Tutor and Grader",
+        "start_date": "20XX-09",
+        "end_date": null,
+        "description": null
+      },
+      {
+        "company": "Mathematics Intern, CSU East Bay Learning Center",
+        "role": "Mathematics Intern",
+        "start_date": "20XX-04",
+        "end_date": "20XX-06",
+        "description": null
+      }
+    ],
+    "skills": [
+      "Advanced PASCAL",
+      "Modula-II",
+      "C",
+      "Icon",
+      "LISP",
+      "FORTRAN",
+      "Machine and Assembly Language for the PDP – 11 and M68000",
+      "Ingres database",
+      "dBASE III",
+      "Equal preprocessor",
+      "UNIX",
+      "VAX/VMS systems"
+    ]
+  },
+  "merged_result": {
+    "name": "ROSA GUTIERREZ",
+    "email": null,
+    "phone": null,
+    "education": [
+      {
+        "degree": "Bachelor of Science, Computer Science",
+        "school": "CSU East Bay",
+        "start_date": "May 20XX",
+        "end_date": "20XX"
+      }
+    ],
+    "experience": [
+      {
+        "company": "NASA/Marshall Space Flight Center",
+        "role": "Computer Programmer",
+        "start_date": "20XX-06",
+        "end_date": "20XX-09",
+        "description": "Learned VAX/VMS system and Machine and Assembly Language, Developed understanding of Ingres database and Equal preprocessor, Revised existing program to maintain flight schedules by integrating with Ingres database, Introduced new program to find a peak frequency of input using the Marinco array processing board and Vectrix graphics monitor"
+      },
+      {
+        "company": "Tutor and Grader, CSU East Bay",
+        "role": "Tutor and Grader",
+        "start_date": "20XX-09",
+        "end_date": null,
+        "description": null
+      },
+      {
+        "company": "Mathematics Intern, CSU East Bay Learning Center",
+        "role": "Mathematics Intern",
+        "start_date": "20XX-04",
+        "end_date": "20XX-06",
+        "description": null
+      }
+    ],
+    "skills": [
+      "Advanced PASCAL",
+      "Modula-II",
+      "C",
+      "Icon",
+      "LISP",
+      "FORTRAN",
+      "Machine and Assembly Language for the PDP – 11 and M68000",
+      "Ingres database",
+      "dBASE III",
+      "Equal preprocessor",
+      "UNIX",
+      "VAX/VMS systems"
+    ]
+  },
+  "parsing_method": "hybrid",
+  "confidence": {
+    "name_from_llm": false,
+    "email_from_llm": false,
+    "phone_from_llm": false,
+    "education_added_by_llm": 0,
+    "experience_added_by_llm": 3,
+    "skills_added_by_llm": 12,
+    "improvement_pct": 33.3
+  }
+}

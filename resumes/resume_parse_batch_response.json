@@ -1,0 +1,450 @@
+{
+  "1-resume.pdf": {
+    "status": "success",
+    "data": {
+      "traditional_parser": {
+        "name": "YOGAPRIYA HARIBASKAR",
+        "email": "yogapriyaharibaskar1806@gmail.com",
+        "phone": "+91 7010842961",
+        "education": [
+          {
+            "degree": "Master of Science Data Science",
+            "school": "Coimbatore Instituteof Technology",
+            "start_date": "2017",
+            "end_date": "Present"
+          },
+          {
+            "degree": "Class XII HSC, 90.00",
+            "school": "Adharsh Vidhyalaya Higher Secondary School, Erode",
+            "start_date": "2016",
+            "end_date": "2017"
+          },
+          {
+            "degree": "Class X SSLC",
+            "school": "R.N.Oxford, Namakkal, 97.00",
+            "start_date": "2014",
+            "end_date": "2015"
+          }
+        ],
+        "experience": [],
+        "skills": []
+      },
+      "llm_parser": {
+        "name": "YOGAPRIYA HARIBASKAR",
+        "email": "yogapriyaharibaskar1806@gmail.com",
+        "phone": "+91 7010842961",
+        "education": [
+          {
+            "degree": "M.Sc Data Science",
+            "school": "Coimbatore Institute of Technology",
+            "start_date": "2017-01",
+            "end_date": null
+          },
+          {
+            "degree": "Class XII ( HSC )",
+            "school": "Adharsh Vidhyalaya Higher Secondary School, Erode",
+            "start_date": "2016-01",
+            "end_date": "2017-01"
+          },
+          {
+            "degree": "Class X ( SSLC )",
+            "school": "R.N.Oxford, Namakkal",
+            "start_date": "2014-01",
+            "end_date": "2015-01"
+          }
+        ],
+        "experience": [
+          {
+            "company": "SIAM COMPUTING, Chennai",
+            "role": "Machine Learning Intern",
+            "start_date": "2020-05",
+            "end_date": null,
+            "description": "Developed a web application to automatically evaluate answer sheets using Natural Language Processing. Explored DJANGO framework and Wordpress Technology"
+          }
+        ],
+        "skills": [
+          "HTML",
+          "CSS",
+          "Python",
+          "Django",
+          "PowerBi",
+          "MySQL",
+          "Open-CV"
+        ]
+      },
+      "merged_result": {
+        "name": "YOGAPRIYA HARIBASKAR",
+        "email": "yogapriyaharibaskar1806@gmail.com",
+        "phone": "+91 7010842961",
+        "education": [
+          {
+            "degree": "Master of Science Data Science",
+            "school": "Coimbatore Instituteof Technology",
+            "start_date": "2017",
+            "end_date": "Present"
+          },
+          {
+            "degree": "Class XII HSC, 90.00",
+            "school": "Adharsh Vidhyalaya Higher Secondary School, Erode",
+            "start_date": "2016",
+            "end_date": "2017"
+          },
+          {
+            "degree": "Class X SSLC",
+            "school": "R.N.Oxford, Namakkal, 97.00",
+            "start_date": "2014",
+            "end_date": "2015"
+          }
+        ],
+        "experience": [
+          {
+            "company": "SIAM COMPUTING, Chennai",
+            "role": "Machine Learning Intern",
+            "start_date": "2020-05",
+            "end_date": null,
+            "description": "Developed a web application to automatically evaluate answer sheets using Natural Language Processing. Explored DJANGO framework and Wordpress Technology"
+          }
+        ],
+        "skills": [
+          "HTML",
+          "CSS",
+          "Python",
+          "Django",
+          "PowerBi",
+          "MySQL",
+          "Open-CV"
+        ]
+      },
+      "parsing_method": "hybrid",
+      "confidence": {
+        "name_from_llm": false,
+        "email_from_llm": false,
+        "phone_from_llm": false,
+        "education_added_by_llm": 0,
+        "experience_added_by_llm": 1,
+        "skills_added_by_llm": 7,
+        "improvement_pct": 33.3
+      }
+    }
+  },
+  "2-resume.pdf": {
+    "status": "success",
+    "data": {
+      "traditional_parser": {
+        "name": "ROSA GUTIERREZ",
+        "email": null,
+        "phone": null,
+        "education": [
+          {
+            "degree": "Bachelor of Science, Computer Science",
+            "school": "CSU East Bay",
+            "start_date": "May 20XX",
+            "end_date": "20XX"
+          }
+        ],
+        "experience": [],
+        "skills": []
+      },
+      "llm_parser": {
+        "name": "Rosa Gutierrez",
+        "email": null,
+        "phone": null,
+        "education": [
+          {
+            "degree": "Bachelor of Science",
+            "school": "CSU East Bay",
+            "start_date": "20XX-05",
+            "end_date": null
+          }
+        ],
+        "experience": [
+          {
+            "company": "NASA/Marshall Space Flight Center",
+            "role": "Computer Programmer",
+            "start_date": "20XX-06",
+            "end_date": "20XX-09",
+            "description": "Learned VAX/VMS system and Machine and Assembly Language, Developed understanding of Ingres database and Equal preprocessor, Revised existing program to maintain flight schedules by integrating with Ingres database, Introduced new program to find a peak frequency of input using the Marinco array processing board and Vectrix graphics monitor"
+          },
+          {
+            "company": "Tutor and Grader, CSU East Bay",
+            "role": "Tutor and Grader",
+            "start_date": "20XX-09",
+            "end_date": null,
+            "description": null
+          },
+          {
+            "company": "Mathematics Intern, CSU East Bay Learning Center",
+            "role": "Mathematics Intern",
+            "start_date": "20XX-04",
+            "end_date": "20XX-06",
+            "description": null
+          }
+        ],
+        "skills": [
+          "Advanced PASCAL",
+          "Modula-II",
+          "C",
+          "Icon",
+          "LISP",
+          "FORTRAN",
+          "Machine and Assembly Language for the PDP – 11 and M68000",
+          "Ingres database",
+          "dBASE III",
+          "Equal preprocessor",
+          "UNIX",
+          "VAX/VMS systems"
+        ]
+      },
+      "merged_result": {
+        "name": "ROSA GUTIERREZ",
+        "email": null,
+        "phone": null,
+        "education": [
+          {
+            "degree": "Bachelor of Science, Computer Science",
+            "school": "CSU East Bay",
+            "start_date": "May 20XX",
+            "end_date": "20XX"
+          }
+        ],
+        "experience": [
+          {
+            "company": "NASA/Marshall Space Flight Center",
+            "role": "Computer Programmer",
+            "start_date": "20XX-06",
+            "end_date": "20XX-09",
+            "description": "Learned VAX/VMS system and Machine and Assembly Language, Developed understanding of Ingres database and Equal preprocessor, Revised existing program to maintain flight schedules by integrating with Ingres database, Introduced new program to find a peak frequency of input using the Marinco array processing board and Vectrix graphics monitor"
+          },
+          {
+            "company": "Tutor and Grader, CSU East Bay",
+            "role": "Tutor and Grader",
+            "start_date": "20XX-09",
+            "end_date": null,
+            "description": null
+          },
+          {
+            "company": "Mathematics Intern, CSU East Bay Learning Center",
+            "role": "Mathematics Intern",
+            "start_date": "20XX-04",
+            "end_date": "20XX-06",
+            "description": null
+          }
+        ],
+        "skills": [
+          "Advanced PASCAL",
+          "Modula-II",
+          "C",
+          "Icon",
+          "LISP",
+          "FORTRAN",
+          "Machine and Assembly Language for the PDP – 11 and M68000",
+          "Ingres database",
+          "dBASE III",
+          "Equal preprocessor",
+          "UNIX",
+          "VAX/VMS systems"
+        ]
+      },
+      "parsing_method": "hybrid",
+      "confidence": {
+        "name_from_llm": false,
+        "email_from_llm": false,
+        "phone_from_llm": false,
+        "education_added_by_llm": 0,
+        "experience_added_by_llm": 3,
+        "skills_added_by_llm": 12,
+        "improvement_pct": 33.3
+      }
+    }
+  },
+  "3-resume.pdf": {
+    "status": "success",
+    "data": {
+      "traditional_parser": {
+        "name": "John Doe",
+        "email": "john.doe@email.com",
+        "phone": null,
+        "education": [
+          {
+            "degree": "PhD in Computer Science",
+            "school": "Princeton University – Princeton, NJ",
+            "start_date": "Sep",
+            "end_date": "2023"
+          },
+          {
+            "degree": "BS in Computer Engineering",
+            "school": "Bo azi i University – Istanbul, T rkiye",
+            "start_date": "Sep",
+            "end_date": "2018"
+          }
+        ],
+        "experience": [],
+        "skills": []
+      },
+      "llm_parser": {
+        "name": "John Doe",
+        "email": "john.doe@email.com",
+        "phone": null,
+        "education": [
+          {
+            "degree": "PhD",
+            "school": "Princeton University",
+            "start_date": "2018-09",
+            "end_date": "2023-05"
+          },
+          {
+            "degree": "BS",
+            "school": "Boğaziçi University",
+            "start_date": "2014-09",
+            "end_date": "2018-06"
+          }
+        ],
+        "experience": [
+          {
+            "company": "Nexus AI",
+            "role": "Co-Founder & CTO",
+            "start_date": "2023-06",
+            "end_date": null,
+            "description": "Built foundation model infrastructure serving 2M+ monthly API requests with 99.97% uptime, Raised $18M Series A led by Sequoia Capital, with participation from a16z and Founders Fund, Scaled engineering team from 3 to 28 across ML research, platform, and applied AI divisions, Developed proprietary inference optimization reducing latency by 73% compared to baseline"
+          },
+          {
+            "company": "NVIDIA Research",
+            "role": "Research Intern",
+            "start_date": "2022-05",
+            "end_date": "2022-08",
+            "description": "Designed sparse attention mechanism reducing transformer memory footprint by 4.2x, Co-authored paper accepted at NeurIPS 2022 (spotlight presentation, top 5% of submissions)"
+          },
+          {
+            "company": "Google DeepMind",
+            "role": "Research Intern",
+            "start_date": "2021-05",
+            "end_date": "2021-08",
+            "description": "Developed reinforcement learning algorithms for multi-agent coordination, Published research at top-tier venues with significant academic impact, ICML 2022 main conference paper, cited 340+ times within two years, NeurIPS 2022 workshop paper on emergent communication protocols, Invited journal extension in JMLR (2023)"
+          },
+          {
+            "company": "Apple ML Research",
+            "role": "Research Intern",
+            "start_date": "2020-05",
+            "end_date": "2020-08",
+            "description": "Created on-device neural network compression pipeline deployed across 50M+ devices, Filed 2 patents on efficient model quantization techniques for edge inference"
+          },
+          {
+            "company": "Microsoft Research",
+            "role": "Research Intern",
+            "start_date": "2019-05",
+            "end_date": "2019-08",
+            "description": "Implemented novel self-supervised learning framework for low-resource language modeling, Research integrated into Azure Cognitive Services, reducing training data requirements by 60%"
+          }
+        ],
+        "skills": [
+          "Python",
+          "C++",
+          "CUDA",
+          "Rust",
+          "Julia",
+          "PyTorch",
+          "JAX",
+          "TensorFlow",
+          "Triton",
+          "ONNX",
+          "Kubernetes",
+          "Ray",
+          "distributed training",
+          "AWS",
+          "GCP",
+          "Neural architecture search",
+          "model compression",
+          "efficient inference",
+          "multi-agent RL"
+        ]
+      },
+      "merged_result": {
+        "name": "John Doe",
+        "email": "john.doe@email.com",
+        "phone": null,
+        "education": [
+          {
+            "degree": "PhD in Computer Science",
+            "school": "Princeton University – Princeton, NJ",
+            "start_date": "Sep",
+            "end_date": "2023"
+          },
+          {
+            "degree": "BS in Computer Engineering",
+            "school": "Bo azi i University – Istanbul, T rkiye",
+            "start_date": "Sep",
+            "end_date": "2018"
+          }
+        ],
+        "experience": [
+          {
+            "company": "Nexus AI",
+            "role": "Co-Founder & CTO",
+            "start_date": "2023-06",
+            "end_date": null,
+            "description": "Built foundation model infrastructure serving 2M+ monthly API requests with 99.97% uptime, Raised $18M Series A led by Sequoia Capital, with participation from a16z and Founders Fund, Scaled engineering team from 3 to 28 across ML research, platform, and applied AI divisions, Developed proprietary inference optimization reducing latency by 73% compared to baseline"
+          },
+          {
+            "company": "NVIDIA Research",
+            "role": "Research Intern",
+            "start_date": "2022-05",
+            "end_date": "2022-08",
+            "description": "Designed sparse attention mechanism reducing transformer memory footprint by 4.2x, Co-authored paper accepted at NeurIPS 2022 (spotlight presentation, top 5% of submissions)"
+          },
+          {
+            "company": "Google DeepMind",
+            "role": "Research Intern",
+            "start_date": "2021-05",
+            "end_date": "2021-08",
+            "description": "Developed reinforcement learning algorithms for multi-agent coordination, Published research at top-tier venues with significant academic impact, ICML 2022 main conference paper, cited 340+ times within two years, NeurIPS 2022 workshop paper on emergent communication protocols, Invited journal extension in JMLR (2023)"
+          },
+          {
+            "company": "Apple ML Research",
+            "role": "Research Intern",
+            "start_date": "2020-05",
+            "end_date": "2020-08",
+            "description": "Created on-device neural network compression pipeline deployed across 50M+ devices, Filed 2 patents on efficient model quantization techniques for edge inference"
+          },
+          {
+            "company": "Microsoft Research",
+            "role": "Research Intern",
+            "start_date": "2019-05",
+            "end_date": "2019-08",
+            "description": "Implemented novel self-supervised learning framework for low-resource language modeling, Research integrated into Azure Cognitive Services, reducing training data requirements by 60%"
+          }
+        ],
+        "skills": [
+          "Python",
+          "C++",
+          "CUDA",
+          "Rust",
+          "Julia",
+          "PyTorch",
+          "JAX",
+          "TensorFlow",
+          "Triton",
+          "ONNX",
+          "Kubernetes",
+          "Ray",
+          "distributed training",
+          "AWS",
+          "GCP",
+          "Neural architecture search",
+          "model compression",
+          "efficient inference",
+          "multi-agent RL"
+        ]
+      },
+      "parsing_method": "hybrid",
+      "confidence": {
+        "name_from_llm": false,
+        "email_from_llm": false,
+        "phone_from_llm": false,
+        "education_added_by_llm": 0,
+        "experience_added_by_llm": 5,
+        "skills_added_by_llm": 19,
+        "improvement_pct": 33.3
+      }
+    }
+  }
+}

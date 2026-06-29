@@ -1,43 +1,30 @@
 {
   "traditional_parser": {
     "name": "YOGAPRIYA HARIBASKAR",
-    "email": null,
+    "email": "yogapriyaharibaskar1806@gmail.com",
     "phone": "+91 7010842961",
     "education": [
       {
         "degree": "Master of Science Data Science",
-        "school": null,
+        "school": "Coimbatore Instituteof Technology",
         "start_date": "2017",
         "end_date": "Present"
       },
       {
-        "degree": "Class XII HSC",
-        "school": "Adharsh Vidhyalaya Higher Secondary School",
+        "degree": "Class XII HSC, 90.00",
+        "school": "Adharsh Vidhyalaya Higher Secondary School, Erode",
         "start_date": "2016",
         "end_date": "2017"
       },
       {
-        "degree": "Class X SSLC  GITHUB REPOSITORY",
-        "school": "R.N.Oxford, Namakkal | 97.00",
+        "degree": "Class X SSLC",
+        "school": "R.N.Oxford, Namakkal, 97.00",
         "start_date": "2014",
         "end_date": "2015"
       }
     ],
-    "experience": [
-      {
-        "company": "Machine Learning Intern",
-        "role": "SIAM COMPUTING , Chennai",
-        "start_date": null,
-        "end_date": null,
-        "description": "AREAS OF INTEREST\nSUMMER INTERN MAY, 2020\nDeveloped a web application to automatically evaluate answer sheets\nusing Natural Language Processing.\nExplored DJANGO framework and Wordpress Technology"
-      }
-    ],
-    "skills": [
-      "To Bachelor of Engineering a part of a competitive organization that provides scope to apply",
-      "also to improve my knowledge in the software industry",
-      "and Present technologies.",
-      "my skills"
-    ]
+    "experience": [],
+    "skills": []
   },
   "llm_parser": {
     "name": "YOGAPRIYA HARIBASKAR",
@@ -88,22 +75,22 @@
     "phone": "+91 7010842961",
     "education": [
       {
-        "degree": "M.Sc Data Science",
-        "school": "Coimbatore Institute of Technology",
-        "start_date": "2017-01",
-        "end_date": null
+        "degree": "Master of Science Data Science",
+        "school": "Coimbatore Instituteof Technology",
+        "start_date": "2017",
+        "end_date": "Present"
       },
       {
-        "degree": "Class XII ( HSC )",
+        "degree": "Class XII HSC, 90.00",
         "school": "Adharsh Vidhyalaya Higher Secondary School, Erode",
-        "start_date": "2016-01",
-        "end_date": "2017-01"
+        "start_date": "2016",
+        "end_date": "2017"
       },
       {
-        "degree": "Class X ( SSLC )",
-        "school": "R.N.Oxford, Namakkal",
-        "start_date": "2014-01",
-        "end_date": "2015-01"
+        "degree": "Class X SSLC",
+        "school": "R.N.Oxford, Namakkal, 97.00",
+        "start_date": "2014",
+        "end_date": "2015"
       }
     ],
     "experience": [
@@ -127,12 +114,12 @@
   },
   "parsing_method": "hybrid",
   "confidence": {
-    "name_from_llm": true,
-    "email_from_llm": true,
-    "phone_from_llm": true,
-    "education_added_by_llm": 3,
+    "name_from_llm": false,
+    "email_from_llm": false,
+    "phone_from_llm": false,
+    "education_added_by_llm": 0,
     "experience_added_by_llm": 1,
     "skills_added_by_llm": 7,
-    "improvement_pct": 66.7
+    "improvement_pct": 33.3
   }
 }
