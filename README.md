@@ -180,11 +180,25 @@ http://localhost:8000/redoc
 
 # 📤 API Endpoint
 
-### Parse Resume
+## 1. Parse Resume (Hybrid)
 
-```http
-POST /parse-resume-hybrid
-```
+**POST** `/parse-resume-hybrid`
+
+Parses a resume using both a **Traditional Parser** and an **LLM Parser**, then merges the results.
+
+### Features
+
+- Supports PDF, DOCX, TXT, and RTF resumes
+- Traditional parsing (Lexer + Parser + AST)
+- LLM-powered extraction
+- Hybrid result merging
+- Confidence score generation
+
+### Query Parameters
+
+| Parameter | Type | Default | Description |
+|----------|------|---------|-------------|
+| use_llm | boolean | true | Enable or disable the LLM parser |
 
 ### Request
 
@@ -192,51 +206,69 @@ POST /parse-resume-hybrid
 multipart/form-data
 ```
 
-Parameter
-
-| Name | Type |
-|------|------|
+| Field | Type |
+|-------|------|
 | file | Resume File |
 
-Optional
+### Response
 
-```
-use_llm=true
-```
+Returns
+
+- Traditional parser output
+- LLM parser output
+- Merged result
+- Confidence metrics
+- Parsing method
 
 ---
 
-# Sample Response
+## 2. Batch Resume Parsing
 
-```json
-{
-  "traditional_parser": {
-    "email": "john@example.com",
-    "phone": "1234567890"
-  },
-  "llm_parser": {
-    "name": "John Doe",
-    "education": [],
-    "experience": [],
-    "skills": [
-      "Python",
-      "FastAPI"
-    ]
-  },
-  "merged_result": {
-    "name": "John Doe",
-    "email": "john@example.com",
-    "phone": "1234567890",
-    "education": [],
-    "experience": [],
-    "skills": [
-      "Python",
-      "FastAPI"
-    ]
-  },
-  "parsing_method": "hybrid"
-}
-```
+**POST** `/parse-resume-batch`
+
+Parse multiple resumes in a single request.
+
+### Features
+
+- Multiple file upload
+- Hybrid parsing
+- Batch processing
+- Individual parsing results
+
+---
+
+## 3. Job Matching
+
+**POST** `/match-job`
+
+Matches a parsed resume against a job description.
+
+### Request
+
+- Resume
+- Job Description
+
+### Returns
+
+- Match Score
+- Matching Skills
+- Missing Skills
+- Candidate Strengths
+- Improvement Suggestions
+
+---
+
+## 4. Batch Job Matching
+
+**POST** `/match-job-batch`
+
+Matches multiple resumes against a single job description.
+
+### Returns
+
+- Match score for each resume
+- Ranked candidates
+- Individual recommendations
 
 ---
 
@@ -301,31 +333,10 @@ This project demonstrates:
 
 ---
 
-# 🧪 Future Improvements
-
-- Confidence Scores
-- Batch Resume Processing
-- Docker Support
-- Local LLM Integration (Ollama)
-- Resume Ranking
-- Job Description Matching
-- OCR Support for Scanned PDFs
-- Unit & Integration Tests
-
----
-
 # Author
 
 **Anaswara K U**
 
 GitHub: https://github.com/anaswaraku
-
----
-
-# License
-
-This project is licensed under the MIT License.
-
----
 
 ## ⭐ If you found this project useful, consider giving it a star!
